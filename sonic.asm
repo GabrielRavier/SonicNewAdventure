@@ -2262,17 +2262,20 @@ LevelSelect:
 		bsr.w	RunPLC
 		tst.l	(v_plc_buffer).w
 		bne.s	LevelSelect
-		andi.b	#btnB+btnStart,(v_jpadpress1).w ; is B or Start pressed?
+		andi.b	#btnC+btnStart,(v_jpadpress1).w ; is C or Start pressed?
 		beq.s	LevelSelect	; if not, branch
 		move.w	(v_levselitem).w,d0
+		tst.w	(v_levselmenu).w
+		bne.s	.skipchk
 		cmpi.w	#$16,d0		; have you selected item $16 (sound test)?
-		beq.s	.checkB				; if so, branch
+		beq.s	.checkC				; if so, branch
+	.skipchk:
 		andi.b	#btnStart,(v_jpadpress1).w	; is Start pressed?
 		beq.s	LevelSelect			; if not, branch
 		bra.s	LevSel_Level_SS			; if so, go to	Level/SS subroutine
 
-.checkB:
-		andi.b	#btnB,(v_jpadpress1).w	; is B pressed?
+.checkC:
+		andi.b	#btnC,(v_jpadpress1).w	; is C pressed?
 		beq.s	LevelSelect		; if not, branch
 
 .soundtest:
@@ -2289,6 +2292,19 @@ LevSel_Credits:
 ; ===========================================================================
 
 LevSel_Level_SS:
+		tst.w	(v_levselmenu).w
+		beq.s	.normalmenu
+		cmpi.w	#6,d0
+		bne.s	.selected
+		move.w	#0,(v_levselmenu).w	; set submenu to 0
+		move.w	#$13,(v_levselitem).w	; set selected item to $13
+		bsr.w	LevSelTextLoad	; reload text
+		bra.w	LevelSelect
+.selected:
+		addq.w	#1,d0
+		move.w	d0,(v_levselss).w
+		bra.s	LevSel_SS
+.normalmenu:
 		add.w	d0,d0
 		lea	(LevSel_Ptrs).l,a0
 		move.w	(a0,d0.w),d0	; load level number
@@ -2296,6 +2312,12 @@ LevSel_Level_SS:
 		beq.s	LevSel_Credits	; if yes, branch
 		cmpi.w	#id_SS*$100,d0	; check	if level is 0700 (Special Stage)
 		bne.s	LevSel_Level	; if not, branch
+		move.w	#1,(v_levselmenu).w	; set submenu to 1
+		move.w	#0,(v_levselitem).w	; set selected item to 0
+		bsr.w	LevSelTextLoad	; reload text
+		bra.w	LevelSelect
+
+LevSel_SS:
 		move.b	#id_Special,(v_gamemode).w ; set screen mode to $10 (Special Stage)
 		clr.w	(v_zone).w	; clear	level
 		move.b	#3,(v_lives).w	; set lives to 3
@@ -2491,13 +2513,14 @@ LevSel_UpDown:
 		beq.s	LevSel_Down	; if not, branch
 		subq.w	#1,d0		; move up 1 selection
 		bhs.s	LevSel_Down
-		moveq	#$16,d0		; if selection moves below 0, jump to selection	$16
+		move.w	(v_levselmax).w,d0		; if selection moves below 0, jump to selection	$16
+		subq.w	#1,d0
 
 LevSel_Down:
 		btst	#bitDn,d1	; is down pressed?
 		beq.s	LevSel_Refresh	; if not, branch
 		addq.w	#1,d0		; move down 1 selection
-		cmpi.w	#$17,d0
+		cmp.w	(v_levselmax).w,d0
 		blo.s	LevSel_Refresh
 		moveq	#0,d0		; if selection moves above $16,	jump to	selection 0
 
@@ -2508,10 +2531,12 @@ LevSel_Refresh:
 ; ===========================================================================
 
 LevSel_SndTest:
+		tst.w	(v_levselmenu).w
+		bne.s	LevSel_NoMove
 		cmpi.w	#$16,(v_levselitem).w ; is item $16 selected?
 		bne.s	LevSel_NoMove	; if not, branch
 		move.b	(v_jpadpress1).w,d1
-		andi.b	#btnA+btnC+btnR+btnL,d1	; is left/right/A/C pressed?
+		andi.b	#btnA+btnB+btnR+btnL,d1	; is left/right/A/B pressed?
 		beq.s	LevSel_NoMove	; if not, branch
 		move.w	(v_levselsound).w,d0
 		btst	#bitL,d1	; is left pressed?
@@ -2525,19 +2550,19 @@ LevSel_Right:
 
 LevSel_ButtonA:
 		btst	#bitA,d1	; is A pressed?
-		beq.s	LevSel_ButtonC	; if not, branch
+		beq.s	LevSel_ButtonB	; if not, branch
 		addi.b	#$10,d0		; add $10 to sound test
-		bcc.s	LevSel_ButtonC	; did the addition overflow?
-		moveq	#0,d0		; if so, set value to $00
+		bcc.s	LevSel_ButtonB	; did the addition overflow?
+		subi.b	#$F0,0		; if so, subtract $F0
 
-LevSel_ButtonC:
-		btst	#bitC,d1	; is C pressed?
+LevSel_ButtonB:
+		btst	#bitB,d1	; is B pressed?
 		beq.s	LevSel_Refresh2	; if not, branch
 		subi.b	#$10,d0		; subtract $10 from sound test
 		bcc.s	LevSel_Refresh2
 		cmpi.b	#$F0,d0
 		beq.s	LevSel_Refresh2	; do not set to 0 if already at 0
-		moveq	#0,d0		; if the subtraction overflowed, set value to $00
+		addi.b	#$F0,d0		; if the subtraction underflowed, add $F0
 
 LevSel_Refresh2:
 		move.w	d0,(v_levselsound).w ; set sound test number
@@ -2558,12 +2583,19 @@ LevSelTextLoad:
 
 	textpos:	= ($40000000+(($E110&$3FFF)<<16)+(($E110&$C000)>>14))
 					; $E110 is a VRAM address
-
+		
+		lea	(SSMenuText).l,a1
+		move.w	#7,(v_levselmax).w
+		tst.w	(v_levselmenu).w
+		bne.s	.issub
 		lea	(LevelMenuText).l,a1
+		move.w	#$17,(v_levselmax).w
+	
+	.issub:
+		moveq	#$17,d1		; number of lines of text
 		lea	(vdp_data_port).l,a6
 		move.l	#textpos,d4	; text position on screen
 		move.w	#$E680,d3	; VRAM setting (4th palette, $680th tile)
-		moveq	#$17,d1		; number of lines of text
 
 	LevSel_DrawAll:
 		move.l	d4,4(a6)
@@ -2579,7 +2611,11 @@ LevSelTextLoad:
 		lsl.w	#7,d0
 		swap	d0
 		add.l	d0,d4
+		lea	(SSMenuText).l,a1
+		tst.w	(v_levselmenu).w
+		bne.s	.issub
 		lea	(LevelMenuText).l,a1
+	.issub:
 		lsl.w	#3,d1
 		move.w	d1,d0
 		add.w	d1,d1
@@ -2594,6 +2630,8 @@ LevSelTextLoad:
 		move.w	#$C680,d3
 
 LevSel_DrawSnd:
+		tst.w	(v_levselmenu).w
+		bne.s	.locret
 		locVRAM	$ECB0		; sound test position on screen
 		move.w	(v_levselsound).w,d0
 		move.b	d0,d2
@@ -2601,6 +2639,7 @@ LevSel_DrawSnd:
 		bsr.w	LevSel_ChgSnd	; draw 1st digit
 		move.b	d2,d0
 		bsr.w	LevSel_ChgSnd	; draw 2nd digit
+	.locret:
 		rts	
 ; End of function LevSelTextLoad
 
@@ -2630,13 +2669,14 @@ LevSel_ChgLine:
 	LevSel_LineLoop:
 		moveq	#0,d0
 		move.b	(a1)+,d0	; get character
-		bpl.s	LevSel_CharOk	; branch if valid
+		cmpi.b	#0,d0		; check if 0
+		bne.s	LevSel_CharOk	; if not, branch
 		move.w	#0,(a6)		; use blank character
 		dbf	d2,LevSel_LineLoop
 		rts	
 
-
 	LevSel_CharOk:
+		subq.b	#1,d0		; subtract 1 (char 0 is space)
 		add.w	d3,d0		; combine char with VRAM setting
 		move.w	d0,(a6)		; send to VRAM
 		dbf	d2,LevSel_LineLoop
@@ -2647,17 +2687,15 @@ LevSel_ChgLine:
 ; ---------------------------------------------------------------------------
 ; Level	select menu text
 ; ---------------------------------------------------------------------------
-	charset '@',"\11\14\15\16\17\18\19\20\21\22\23\24\25\26\27\28\29\30\31\32\33\34\35\36\37\38\39"
-	charset '0',"\0\1\2\3\4\5\6\7\8\9"
-	charset '*',$A
-	charset ':',$C
-	charset '.',$D
-	charset ' ',$FF
+	charset '@',"\12\15\16\17\18\19\20\21\22\23\24\25\26\27\28\29\30\31\32\33\34\35\36\37\38\39\40"
+	charset '0',"\1\2\3\4\5\6\7\8\9\10"
+	charset '*',$B
+	charset ':',$D
+	charset '.',$E
+	charset ' ',0	
 
-LevelMenuHeader:	
-
-LevelMenuText:	
-	dc.b "   *  LEVEL SELECT  *   "
+LevelMenuText:
+	dc.b "  .*  LEVEL SELECT  *.  "
 	dc.b "GREEN HILL ZONE    ACT 1"
 	dc.b "                   ACT 2"
 	dc.b "                   ACT 3"
@@ -2680,7 +2718,33 @@ LevelMenuText:
 	dc.b "SPECIAL STAGE           "
 	dc.b "ENDING SEQUENCE         "
 	dc.b "CREDITS                 "
-	dc.b "SOUND SELECT   *  *     "
+	dc.b "SOUND TEST     *  *     "
+
+SSMenuText:
+	dc.b "  .* SPECIAL SELECT *.  "
+	dc.b "STAGE 1                 "
+	dc.b "STAGE 2                 "
+	dc.b "STAGE 3                 "
+	dc.b "STAGE 4                 "
+	dc.b "STAGE 5                 "
+	dc.b "STAGE 6                 "
+	dc.b "RETURN TO LEVEL SELECT  "
+	dc.b "                        "
+	dc.b "                        "
+	dc.b "                        "
+	dc.b "                        "
+	dc.b "                        "
+	dc.b "                        "
+	dc.b "                        "
+	dc.b "                        "
+	dc.b "                        "
+	dc.b "                        "
+	dc.b "                        "
+	dc.b "                        "
+	dc.b "                        "
+	dc.b "                        "
+	dc.b "                        "
+	dc.b "                        "
 	
 	charset
 	
@@ -8163,6 +8227,13 @@ SS_StartLoc:	include	"_inc/Start Location Array - Special Stages.asm"
 
 
 SS_Load:
+		tst.w	(v_levselss).w
+		beq.s	.normal
+		move.b	(v_levselss+1).w,d0
+		subq.b	#1,d0
+		clr.w	(v_levselss).w
+		bra.s	SS_LoadData
+	.normal:
 		moveq	#0,d0
 		move.b	(v_lastspecial).w,d0 ; load number of last special stage entered
 		addq.b	#1,(v_lastspecial).w
@@ -8193,7 +8264,8 @@ SS_LoadData:
 		lea	SS_StartLoc(pc,d0.w),a1
 		move.w	(a1)+,(v_player+obX).w
 		move.w	(a1)+,(v_player+obY).w
-		movea.l	SS_LayoutIndex(pc,d0.w),a0
+		lea	(SS_LayoutIndex).l,a0
+		movea.l	(a0,d0.w),a0
 		lea	($FF4000).l,a1
 		move.w	#0,d0
 		jsr	(EniDec).l
