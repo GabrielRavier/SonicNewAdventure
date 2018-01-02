@@ -1,0 +1,7 @@
+Palette File: ../palette/Level Select.bin
+Mapping File: ../tilemaps/Level Select BG.bin
+Art File: ../artnem/Level Select BG.bin
+Mapping Compression: Enigma
+Art Compression: Nemesis
+x-Size: 0x28
+y-Size: 0x1C

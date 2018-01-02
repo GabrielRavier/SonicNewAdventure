@@ -17,6 +17,15 @@ zeroOffsetOptimization = 0
 	include	"Variables.asm"
 	include	"Macros.asm"
 
+; ===========================================================================
+; Sonic 2 Clone Driver v2 and SMPS2ASM
+	include "sound/Sonic 2 Clone Driver v2 - Macros.asm"
+	include "sound/Sonic 2 Clone Driver v2 - Sound IDs.asm"
+	include "sound/Sonic 2 Clone Driver v2 - Compatibility.asm"
+	include "sound/Sonic 2 Clone Driver v2 - RAM.asm"
+	include "sound/Sonic 2 Clone Driver v2 - Constants.asm"
+	include "sound/_smps2asm_inc.asm"
+
 EnableSRAM:	equ 0	; change to 1 to enable SRAM
 BackupSRAM:	equ 1
 AddressSRAM:	equ 3	; 0 = odd+even; 2 = even only; 3 = odd only
@@ -236,27 +245,6 @@ zStartupCodeEndLoc:
 ; ===========================================================================
 
 GameProgram:
-		tst.w	(vdp_control_port).l
-		btst	#6,($A1000D).l
-		beq.s	CheckSumCheck
-		cmpi.l	#'init',(v_init).w ; has checksum routine already run?
-		beq.w	GameInit	; if yes, branch
-
-CheckSumCheck:
-		movea.l	#ErrorTrap,a0	; start	checking bytes after the header	($200)
-		movea.l	#RomEndLoc,a1	; stop at end of ROM
-		move.l	(a1),d0
-		moveq	#0,d1
-
-	.loop:
-		add.w	(a0)+,d1
-		cmp.l	a0,d0
-		bhs.s	.loop
-		movea.l	#Checksum,a1	; read the checksum
-		cmp.w	(a1),d1		; compare checksum in header to ROM
-		bne.w	CheckSumError	; if they don't match, branch
-
-	CheckSumOk:
 		lea	($FFFFFE00).w,a6
 		moveq	#0,d7
 		move.w	#$7F,d6
@@ -267,7 +255,6 @@ CheckSumCheck:
 		move.b	(z80_version).l,d0
 		andi.b	#$C0,d0
 		move.b	d0,(v_megadrive).w ; get region setting
-		move.l	#'init',(v_init).w ; set flag so checksum won't run again
 
 GameInit:
 		lea	($FF0000).l,a6
@@ -283,9 +270,10 @@ GameInit:
 		move.b	#id_Sega,(v_gamemode).w ; set Game Mode to Sega Screen
 
 MainGameLoop:
+		moveq	#0,d0
 		move.b	(v_gamemode).w,d0 ; load Game Mode
-		andi.w	#$1C,d0
-		jsr	GameModeArray(pc,d0.w) ; jump to apt location in ROM
+		move.w	GameModeArray(pc,d0.w),d1
+		jsr	GameModeArray(pc,d1.w) ; jump to apt location in ROM
 		bra.s	MainGameLoop
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -294,21 +282,23 @@ MainGameLoop:
 
 GameModeArray:
 
-ptr_GM_Sega:	bra.w	GM_Sega		; Sega Screen ($00)
+ptr_GM_Sega:	dc.w	GM_Sega-GameModeArray		; Sega Screen ($00)
 
-ptr_GM_Title:	bra.w	GM_Title	; Title	Screen ($04)
+ptr_GM_Title:	dc.w	GM_Title-GameModeArray	; Title	Screen ($04)
 
-ptr_GM_Demo:	bra.w	GM_Level	; Demo Mode ($08)
+ptr_GM_Demo:	dc.w	GM_Level-GameModeArray	; Demo Mode ($08)
 
-ptr_GM_Level:	bra.w	GM_Level	; Normal Level ($0C)
+ptr_GM_Level:	dc.w	GM_Level-GameModeArray	; Normal Level ($0C)
 
-ptr_GM_Special:	bra.w	GM_Special	; Special Stage	($10)
+ptr_GM_Special:	dc.w	GM_Special-GameModeArray	; Special Stage	($10)
 
-ptr_GM_Cont:	bra.w	GM_Continue	; Continue Screen ($14)
+ptr_GM_Cont:	dc.w	GM_Continue-GameModeArray	; Continue Screen ($14)
 
-ptr_GM_Ending:	bra.w	GM_Ending	; End of game sequence ($18)
+ptr_GM_Ending:	dc.w	GM_Ending-GameModeArray	; End of game sequence ($18)
 
-ptr_GM_Credits:	bra.w	GM_Credits	; Credits ($1C)
+ptr_GM_Credits:	dc.w	GM_Credits-GameModeArray	; Credits ($1C)
+
+ptr_GM_LevSel:	dc.w	GM_LevSel-GameModeArray	; Level select
 
 		rts	
 ; ===========================================================================
@@ -524,7 +514,7 @@ VBlank:
 		jsr	VBla_Index(pc,d0.w)
 
 VBla_Music:
-		jsr	(UpdateMusic).l
+		SMPS_UpdateSoundDriver
 
 VBla_Exit:
 		addq.l	#1,(v_vbla_count).w
@@ -1012,32 +1002,8 @@ ClearScreen:
 		dbf	d1,.clearhscroll ; clear hscroll table (in RAM)
 		rts	
 ; End of function ClearScreen
-
-; ---------------------------------------------------------------------------
-; Subroutine to	load the sound driver
-; ---------------------------------------------------------------------------
-
-; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
-
-
-SoundDriverLoad:
-		nop	
-		stopZ80
-		resetZ80
-		lea	(Kos_Z80).l,a0	; load sound driver
-		lea	(z80_ram).l,a1	; target Z80 RAM
-		bsr.w	KosDec		; decompress
-		resetZ80a
-		nop	
-		nop	
-		nop	
-		nop	
-		resetZ80
-		startZ80
-		rts	
-; End of function SoundDriverLoad
-
-		include	"_incObj/sub PlaySound.asm"
+		
+		include "sound/Sonic 2 Clone Driver v2 - Functions.asm"
 		include	"_inc/PauseGame.asm"
 
 ; ---------------------------------------------------------------------------
@@ -2239,32 +2205,55 @@ Tit_ChkLevSel:
 		beq.w	PlayLevel	; if not, play level
 		btst	#bitA,(v_jpadhold1).w ; check if A is pressed
 		beq.w	PlayLevel	; if not, play level
-
-		moveq	#palid_LevelSel,d0
-		bsr.w	PalLoad2	; load level select palette
-		lea	(v_hscrolltablebuffer).w,a1
-		moveq	#0,d0
-		move.w	#$DF,d1
-
-	Tit_ClrScroll1:
-		move.l	d0,(a1)+
-		dbf	d1,Tit_ClrScroll1 ; clear scroll data (in RAM)
-
-		move.l	d0,(v_scrposy_dup).w
-		disable_ints
-		lea	(vdp_data_port).l,a6
-		locVRAM	$E000
-		move.w	#$3FF,d1
-
-	Tit_ClrScroll2:
-		move.l	d0,(a6)
-		dbf	d1,Tit_ClrScroll2 ; clear scroll data (in VRAM)
-
-		bsr.w	LevSelTextLoad
+		move.b	#id_LevSel,(v_gamemode).w	; set screen mode to level select
+		rts
 
 ; ---------------------------------------------------------------------------
 ; Level	Select
 ; ---------------------------------------------------------------------------
+
+GM_LevSel:
+		sfx	bgm_Fade,0,0,0	; fade music
+		bsr.w	PaletteFadeOut
+		bsr.w	ClearScreen
+		disable_ints
+		lea	(vdp_data_port).l,a6
+		locVRAM	0
+		lea	(Nem_LevSelBG).l,a0 ; load level select BG tiles
+		bsr.w	NemDec
+		lea	($FF0000).l,a1
+		lea	(Eni_LevSelBG).l,a0 ; load mappings for	level select BG
+		move.w	#0,d0
+		bsr.w	EniDec
+
+		copyTilemap	$FF0000,$C000,$27,$1B
+		locVRAM	$D000
+		lea	(Nem_LevSelFont).l,a0 ; load level select font
+		bsr.w	NemDec
+		
+		moveq	#palid_LevelSel,d0
+		bsr.w	PalLoad1	; load level select palette
+		
+		lea	(v_hscrolltablebuffer).w,a1
+		moveq	#0,d0
+		move.w	#$DF,d1
+
+	LevSel_ClrScroll1:
+		move.l	d0,(a1)+
+		dbf	d1,LevSel_ClrScroll1 ; clear scroll data (in RAM)
+
+		move.l	d0,(v_scrposy_dup).w
+		lea	(vdp_data_port).l,a6
+		locVRAM	$E000
+		move.w	#$3FF,d1
+
+	LevSel_ClrScroll2:
+		move.l	d0,(a6)
+		dbf	d1,LevSel_ClrScroll2 ; clear scroll data (in VRAM)
+
+		bsr.w	LevSelTextLoad
+		music	bgm_Menu,0,0,0	; play level select theme
+		bsr.w	PaletteFadeIn
 
 LevelSelect:
 		move.b	#4,(v_vbla_routine).w
@@ -2273,37 +2262,23 @@ LevelSelect:
 		bsr.w	RunPLC
 		tst.l	(v_plc_buffer).w
 		bne.s	LevelSelect
-		andi.b	#btnABC+btnStart,(v_jpadpress1).w ; is A, B, C, or Start pressed?
+		andi.b	#btnB+btnStart,(v_jpadpress1).w ; is B or Start pressed?
 		beq.s	LevelSelect	; if not, branch
 		move.w	(v_levselitem).w,d0
-		cmpi.w	#$14,d0		; have you selected item $14 (sound test)?
-		bne.s	LevSel_Level_SS	; if not, go to	Level/SS subroutine
+		cmpi.w	#$16,d0		; have you selected item $16 (sound test)?
+		beq.s	.checkB				; if so, branch
+		andi.b	#btnStart,(v_jpadpress1).w	; is Start pressed?
+		beq.s	LevelSelect			; if not, branch
+		bra.s	LevSel_Level_SS			; if so, go to	Level/SS subroutine
+
+.checkB:
+		andi.b	#btnB,(v_jpadpress1).w	; is B pressed?
+		beq.s	LevelSelect		; if not, branch
+
+.soundtest:
 		move.w	(v_levselsound).w,d0
-		addi.w	#$80,d0
-		tst.b	(f_creditscheat).w ; is Japanese Credits cheat on?
-		beq.s	LevSel_NoCheat	; if not, branch
-		cmpi.w	#$9F,d0		; is sound $9F being played?
-		beq.s	LevSel_Ending	; if yes, branch
-		cmpi.w	#$9E,d0		; is sound $9E being played?
-		beq.s	LevSel_Credits	; if yes, branch
-
-LevSel_NoCheat:
-		; This is a workaround for a bug, see Sound_ChkValue for more.
-		; Once you've fixed the bugs there, comment these four instructions out
-		cmpi.w	#bgm__Last+1,d0	; is sound $80-$93 being played?
-		blo.s	LevSel_PlaySnd	; if yes, branch
-		cmpi.w	#sfx__First,d0	; is sound $94-$9F being played?
-		blo.s	LevelSelect	; if yes, branch
-
-LevSel_PlaySnd:
 		bsr.w	PlaySound_Special
 		bra.s	LevelSelect
-; ===========================================================================
-
-LevSel_Ending:
-		move.b	#id_Ending,(v_gamemode).w ; set screen mode to $18 (Ending)
-		move.w	#(id_EndZ<<8),(v_zone).w ; set level to 0600 (Ending)
-		rts	
 ; ===========================================================================
 
 LevSel_Credits:
@@ -2315,8 +2290,10 @@ LevSel_Credits:
 
 LevSel_Level_SS:
 		add.w	d0,d0
-		move.w	LevSel_Ptrs(pc,d0.w),d0 ; load level number
-		bmi.w	LevelSelect
+		lea	(LevSel_Ptrs).l,a0
+		move.w	(a0,d0.w),d0	; load level number
+		cmpi.w	#$8000,d0		; check if "level" is 8000 (credits)
+		beq.s	LevSel_Credits	; if yes, branch
 		cmpi.w	#id_SS*$100,d0	; check	if level is 0700 (Special Stage)
 		bne.s	LevSel_Level	; if not, branch
 		move.b	#id_Special,(v_gamemode).w ; set screen mode to $10 (Special Stage)
@@ -2339,6 +2316,10 @@ LevSel_Level:
 
 PlayLevel:
 		move.b	#id_Level,(v_gamemode).w ; set screen mode to $0C (level)
+		cmpi.b	#id_EndZ,(v_zone).w	; check if level is ending zone
+		bne.s	.notend		; if not, branch
+		move.b	#id_Ending,(v_gamemode).w ; set screen mode to $18 (Ending)
+	.notend:
 		move.b	#3,(v_lives).w	; set lives to 3
 		moveq	#0,d0
 		move.w	d0,(v_rings).w	; clear rings
@@ -2403,7 +2384,9 @@ LevSel_Ptrs:	if Revision=0
 		dc.b id_SBZ, 2
 		endif
 		dc.b id_SS, 0		; Special Stage
-		dc.w $8000		; Sound Test
+		dc.b id_EndZ, 0		; Ending Sequence
+		dc.w $8000		; Credits
+		dc.w $FFFF		; Sound Test
 		even
 ; ---------------------------------------------------------------------------
 ; Level	select codes
@@ -2508,15 +2491,15 @@ LevSel_UpDown:
 		beq.s	LevSel_Down	; if not, branch
 		subq.w	#1,d0		; move up 1 selection
 		bhs.s	LevSel_Down
-		moveq	#$14,d0		; if selection moves below 0, jump to selection	$14
+		moveq	#$16,d0		; if selection moves below 0, jump to selection	$16
 
 LevSel_Down:
 		btst	#bitDn,d1	; is down pressed?
 		beq.s	LevSel_Refresh	; if not, branch
 		addq.w	#1,d0		; move down 1 selection
-		cmpi.w	#$15,d0
+		cmpi.w	#$17,d0
 		blo.s	LevSel_Refresh
-		moveq	#0,d0		; if selection moves above $14,	jump to	selection 0
+		moveq	#0,d0		; if selection moves above $16,	jump to	selection 0
 
 LevSel_Refresh:
 		move.w	d0,(v_levselitem).w ; set new selection
@@ -2525,25 +2508,36 @@ LevSel_Refresh:
 ; ===========================================================================
 
 LevSel_SndTest:
-		cmpi.w	#$14,(v_levselitem).w ; is item $14 selected?
+		cmpi.w	#$16,(v_levselitem).w ; is item $16 selected?
 		bne.s	LevSel_NoMove	; if not, branch
 		move.b	(v_jpadpress1).w,d1
-		andi.b	#btnR+btnL,d1	; is left/right	pressed?
+		andi.b	#btnA+btnC+btnR+btnL,d1	; is left/right/A/C pressed?
 		beq.s	LevSel_NoMove	; if not, branch
 		move.w	(v_levselsound).w,d0
 		btst	#bitL,d1	; is left pressed?
 		beq.s	LevSel_Right	; if not, branch
 		subq.w	#1,d0		; subtract 1 from sound	test
-		bhs.s	LevSel_Right
-		moveq	#$4F,d0		; if sound test	moves below 0, set to $4F
 
 LevSel_Right:
 		btst	#bitR,d1	; is right pressed?
-		beq.s	LevSel_Refresh2	; if not, branch
+		beq.s	LevSel_ButtonA	; if not, branch
 		addq.w	#1,d0		; add 1	to sound test
-		cmpi.w	#$50,d0
-		blo.s	LevSel_Refresh2
-		moveq	#0,d0		; if sound test	moves above $4F, set to	0
+
+LevSel_ButtonA:
+		btst	#bitA,d1	; is A pressed?
+		beq.s	LevSel_ButtonC	; if not, branch
+		addi.b	#$10,d0		; add $10 to sound test
+		bcc.s	LevSel_ButtonC	; did the addition overflow?
+		moveq	#0,d0		; if so, set value to $00
+
+LevSel_ButtonC:
+		btst	#bitC,d1	; is C pressed?
+		beq.s	LevSel_Refresh2	; if not, branch
+		subi.b	#$10,d0		; subtract $10 from sound test
+		bcc.s	LevSel_Refresh2
+		cmpi.b	#$F0,d0
+		beq.s	LevSel_Refresh2	; do not set to 0 if already at 0
+		moveq	#0,d0		; if the subtraction overflowed, set value to $00
 
 LevSel_Refresh2:
 		move.w	d0,(v_levselsound).w ; set sound test number
@@ -2562,14 +2556,14 @@ LevSel_NoMove:
 
 LevSelTextLoad:
 
-	textpos:	= ($40000000+(($E210&$3FFF)<<16)+(($E210&$C000)>>14))
-					; $E210 is a VRAM address
+	textpos:	= ($40000000+(($E110&$3FFF)<<16)+(($E110&$C000)>>14))
+					; $E110 is a VRAM address
 
 		lea	(LevelMenuText).l,a1
 		lea	(vdp_data_port).l,a6
 		move.l	#textpos,d4	; text position on screen
 		move.w	#$E680,d3	; VRAM setting (4th palette, $680th tile)
-		moveq	#$14,d1		; number of lines of text
+		moveq	#$17,d1		; number of lines of text
 
 	LevSel_DrawAll:
 		move.l	d4,4(a6)
@@ -2579,6 +2573,7 @@ LevSelTextLoad:
 
 		moveq	#0,d0
 		move.w	(v_levselitem).w,d0
+		addq.w	#1,d0
 		move.w	d0,d1
 		move.l	#textpos,d4
 		lsl.w	#7,d0
@@ -2594,14 +2589,13 @@ LevSelTextLoad:
 		move.l	d4,4(a6)
 		bsr.w	LevSel_ChgLine	; recolour selected line
 		move.w	#$E680,d3
-		cmpi.w	#$14,(v_levselitem).w
+		cmpi.w	#$16,(v_levselitem).w
 		bne.s	LevSel_DrawSnd
 		move.w	#$C680,d3
 
 LevSel_DrawSnd:
-		locVRAM	$EC30		; sound test position on screen
+		locVRAM	$ECB0		; sound test position on screen
 		move.w	(v_levselsound).w,d0
-		addi.w	#$80,d0
 		move.b	d0,d2
 		lsr.b	#4,d0
 		bsr.w	LevSel_ChgSnd	; draw 1st digit
@@ -2618,7 +2612,7 @@ LevSel_ChgSnd:
 		andi.w	#$F,d0
 		cmpi.b	#$A,d0		; is digit $A-$F?
 		blo.s	LevSel_Numb	; if not, branch
-		addi.b	#7,d0		; use alpha characters
+		addq.b	#4,d0		; use alpha characters
 
 	LevSel_Numb:
 		add.w	d3,d0
@@ -2653,12 +2647,43 @@ LevSel_ChgLine:
 ; ---------------------------------------------------------------------------
 ; Level	select menu text
 ; ---------------------------------------------------------------------------
-LevelMenuText:	if Revision=0
-		binclude	"misc/Level Select Text.bin"
-		else
-		binclude	"misc/Level Select Text (JP1).bin"
-		endif
-		even
+	charset '@',"\11\14\15\16\17\18\19\20\21\22\23\24\25\26\27\28\29\30\31\32\33\34\35\36\37\38\39"
+	charset '0',"\0\1\2\3\4\5\6\7\8\9"
+	charset '*',$A
+	charset ':',$C
+	charset '.',$D
+	charset ' ',$FF
+
+LevelMenuHeader:	
+
+LevelMenuText:	
+	dc.b "   *  LEVEL SELECT  *   "
+	dc.b "GREEN HILL ZONE    ACT 1"
+	dc.b "                   ACT 2"
+	dc.b "                   ACT 3"
+	dc.b "MARBLE ZONE        ACT 1"
+	dc.b "                   ACT 2"
+	dc.b "                   ACT 3"
+	dc.b "SPRING YARD ZONE   ACT 1"
+	dc.b "                   ACT 2"
+	dc.b "                   ACT 3"
+	dc.b "LABYRINTH ZONE     ACT 1"
+	dc.b "                   ACT 2"
+	dc.b "                   ACT 3"
+	dc.b "STAR LIGHT ZONE    ACT 1"
+	dc.b "                   ACT 2"
+	dc.b "                   ACT 3"
+	dc.b "SCRAP BRAIN ZONE   ACT 1"
+	dc.b "                   ACT 2"
+	dc.b "                   ACT 3"
+	dc.b "FINAL ZONE              "
+	dc.b "SPECIAL STAGE           "
+	dc.b "ENDING SEQUENCE         "
+	dc.b "CREDITS                 "
+	dc.b "SOUND SELECT   *  *     "
+	
+	charset
+	
 ; ---------------------------------------------------------------------------
 ; Music	playlist
 ; ---------------------------------------------------------------------------
@@ -3270,7 +3295,21 @@ SS_MainLoop:
 	SS_ChkEnd:
 		cmpi.b	#id_Special,(v_gamemode).w ; is game mode $10 (special stage)?
 		beq.w	SS_MainLoop	; if yes, branch
-
+		cmpi.b	#id_LevSel,(v_gamemode).w	; is game mode level select?
+		bne.s	.notlevsel	; if not, branch
+		bsr.w	PaletteFadeOut
+		disable_ints
+		lea	(vdp_control_port).l,a6
+		move.w	#$8200+(vram_fg>>10),(a6) ; set foreground nametable address
+		move.w	#$8400+(vram_bg>>13),(a6) ; set background nametable address
+		move.w	#$9001,(a6)		; 64-cell hscroll size
+		jsr	(Hud_Base).l
+		enable_ints
+		moveq	#plcid_Main,d0
+		bsr.w	NewPLC
+		rts
+	
+	.notlevsel:
 		tst.w	(f_demo).w	; is demo mode on?
 		if Revision=0
 		bne.w	SS_ToSegaScreen	; if yes, branch
@@ -3884,10 +3923,12 @@ End_MainLoop:
 		bsr.w	SynchroAnimate
 		cmpi.b	#id_Ending,(v_gamemode).w ; is game mode $18 (ending)?
 		beq.s	End_ChkEmerald	; if yes, branch
-
+		cmpi.b	#id_LevSel,(v_gamemode).w	; is game mode level select?
+		beq.s	.locret		; if yes, branch
 		move.b	#id_Credits,(v_gamemode).w ; goto credits
 		sfx	bgm_Credits,0,1,1 ; play credits music
 		move.w	#0,(v_creditsnum).w ; set credits index number to 0
+	.locret:
 		rts	
 ; ===========================================================================
 
@@ -8365,6 +8406,12 @@ Eni_JapNames:	binclude	"tilemaps/Hidden Japanese Credits.bin" ; Japanese credits
 		even
 Nem_JapNames:	binclude	"artnem/Hidden Japanese Credits.bin"
 		even
+Nem_LevSelFont:	binclude	"artnem/Level Select Font.bin"
+		even
+Eni_LevSelBG:	binclude	"tilemaps/Level Select BG.bin"
+		even
+Nem_LevSelBG:	binclude	"artnem/Level Select BG.bin"
+		even
 
 Map_Sonic:	include	"_maps/Sonic.asm"
 SonicDynPLC:	include	"_maps/Sonic - Dynamic Gfx Script.asm"
@@ -9078,7 +9125,7 @@ ObjPos_Null:	dc.b $FF, $FF, 0, 0, 0,	0
 		endm
 		endif
 
-SoundDriver:	include "s1.sounddriver.asm"
+		include "sound/Sonic 2 Clone Driver v2.asm"
 
 ; end of 'ROM'
 		even
