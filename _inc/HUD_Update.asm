@@ -10,8 +10,14 @@ hudVRAM:	macro loc
 
 
 HUD_Update:
-		tst.w	(f_debugmode).w	; is debug mode	on?
+		tst.w	(v_debuguse).w	; is debug mode	on?
 		bne.w	HudDebug	; if yes, branch
+		tst.b	(f_debughud).w
+		beq.s	.proceed
+		bsr.w	Hud_Base
+		move.b	#1,(f_scorecount).w
+		move.b	#1,(f_ringcount).w
+	.proceed:
 		tst.b	(f_scorecount).w ; does the score need updating?
 		beq.s	.chkrings	; if not, branch
 
@@ -40,11 +46,11 @@ HUD_Update:
 		bne.s	.chklives	; if yes, branch
 		lea	(v_time).w,a1
 		cmpi.l	#(9*$10000)+(59*$100)+59,(a1)+ ; is the time 9:59:59?
-		beq.s	TimeOver	; if yes, branch
+		beq.w	TimeOver	; if yes, branch
 
 		addq.b	#1,-(a1)	; increment 1/60s counter
 		cmpi.b	#60,(a1)	; check if passed 60
-		bcs.s	.chklives
+		bcs.s	.debugupdate
 		move.b	#0,(a1)
 		addq.b	#1,-(a1)	; increment second counter
 		cmpi.b	#60,(a1)	; check if passed 60
@@ -54,6 +60,11 @@ HUD_Update:
 		cmpi.b	#9,(a1)		; check if passed 9
 		bcs.s	.updatetime
 		move.b	#9,(a1)		; keep as 9
+	
+	.debugupdate:
+		tst.b	(f_debughud).w
+		beq.s	.chklives
+		clr.b	(f_debughud).w
 
 	.updatetime:
 		hudVRAM	$DE40
@@ -97,6 +108,7 @@ TimeOver:
 ; ===========================================================================
 
 HudDebug:
+		move.b	#1,(f_debughud).w
 		bsr.w	HudDb_XY
 		tst.b	(f_ringcount).w	; does the ring	counter	need updating?
 		beq.s	.objcounter	; if not, branch

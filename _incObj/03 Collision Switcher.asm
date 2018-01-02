@@ -7,10 +7,8 @@ PathSwapper:
 		move.b	obRoutine(a0),d0
 		move.w	PSwapper_Index(pc,d0.w),d1
 		jsr	PSwapper_Index(pc,d1.w)
-	if DebugPathSwappers
-		tst.w	(f_debugcheat).w
+		tst.w	(v_debuguse).w
 		bne.w	RememberState
-	endif
 		; like RememberState, but doesn't display (Sonic 2's MarkObjGone3)
 		out_of_range	.offscreen
 		rts
