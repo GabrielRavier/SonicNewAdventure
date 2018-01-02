@@ -1976,7 +1976,8 @@ GM_Sega:
 
 	.loadpal:
 		moveq	#palid_SegaBG,d0
-		bsr.w	PalLoad2	; load Sega logo palette
+		bsr.w	PalLoad1	; load Sega logo palette
+		bsr.w	PaletteFadeIn	; fade it in
 		move.w	#-$A,(v_pcyc_num).w
 		move.w	#0,(v_pcyc_time).w
 		move.w	#0,(v_pal_buffer+$12).w
@@ -2114,11 +2115,13 @@ GM_Title:
 		move.w	#0,d0
 		bsr.w	EniDec
 
-		copyTilemap	$FF0000,$C206,$21,$15
+		copyTilemap	$FF0000,$C208,$21,$15
 
 		locVRAM	0
 		lea	(Nem_GHZ_1st).l,a0 ; load GHZ patterns
 		bsr.w	NemDec
+		moveq	#palid_GHZ,d0	; load GHZ palette
+		bsr.w	PalLoad1
 		moveq	#palid_Title,d0	; load title screen palette
 		bsr.w	PalLoad1
 		sfx	bgm_Title,0,1,1	; play title screen music
@@ -2126,7 +2129,7 @@ GM_Title:
 		move.w	#$178,(v_demolength).w ; run title screen for $178 frames
 		lea	(v_objspace+$80).w,a1
 		moveq	#0,d0
-		move.w	#7,d1
+		move.w	#$F,d1
 
 	Tit_ClrObj2:
 		move.l	d0,(a1)+
@@ -2164,7 +2167,7 @@ Tit_MainLoop:
 		jsr	(ExecuteObjects).l
 		bsr.w	DeformLayers
 		jsr	(BuildSprites).l
-		bsr.w	PCycle_Title
+		bsr.w	PCycle_GHZ
 		bsr.w	RunPLC
 		move.w	(v_objspace+obX).w,d0
 		addq.w	#2,d0
