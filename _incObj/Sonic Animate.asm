@@ -14,6 +14,7 @@ Sonic_Animate:
 		move.b	d0,obNextAni(a0) ; set to "no restart"
 		move.b	#0,obAniFrame(a0) ; reset animation
 		move.b	#0,obTimeFrame(a0) ; reset frame duration
+		bclr	#5,obStatus(a0)	; clear pushing bit
 
 	.do:
 		add.w	d0,d0

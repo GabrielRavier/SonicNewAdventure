@@ -58,13 +58,13 @@ Vectors:	dc.l $FFFE00, EntryPoint, BusError, AddressError
 		dc.l ErrorTrap,	ErrorTrap, ErrorTrap, ErrorTrap
 		dc.l ErrorTrap,	ErrorTrap, ErrorTrap, ErrorTrap
 Console:	dc.b "SEGA MEGA DRIVE " ; Hardware system ID
-_Date:		dc.b "(C)SEGA 1991.APR" ; Release date
-Title_Local:	dc.b "SONIC THE               HEDGEHOG                " ; Domestic name
-Title_Int:	dc.b "SONIC THE               HEDGEHOG                " ; International name
+_Date:		dc.b "(C)ADCL 2018.JAN" ; Release date
+Title_Local:	dc.b "SONIC NEW ADVENTURE                             " ; Domestic name
+Title_Int:	dc.b "SONIC NEW ADVENTURE                             " ; International name
 Serial:		if Revision=0
 		dc.b "GM 00001009-00"   ; Serial/version number
 		else
-			dc.b "GM 00004049-01"
+			dc.b "SH NEWADVEN-FF"
 		endif
 Checksum:	dc.w 0
 		dc.b "J               " ; I/O support

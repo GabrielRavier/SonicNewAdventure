@@ -797,7 +797,7 @@ PlaySega:
 	dbf	d0,.idle			; Decrement d0; jump to itself if not 0. (for pitch control, avoids playing the sample too fast)
 	movea.w	a4,a0				; address where JoyPad states are written
 	movea.l	a5,a1				; address where JoyPad states are read from
-	jsr	(Joypad_Read).w			; Read only the first joypad port. It's important that we do NOT do the two ports, we don't have the cycles for that
+	jsr	(Joypad_Read).l			; Read only the first joypad port. It's important that we do NOT do the two ports, we don't have the cycles for that
 	tst.b	(a4)				; Check for Start button
 	bmi.s	.endloop			; If start is pressed, stop playing, leave this loop, and unfreeze the 68K, otherwise, continue playing PCM sample
 	dbf	d3,.loop			; Count down d3 and loop. If d3 = 0, we finished playing the PCM sample, so stop playing, leave this loop, and unfreeze the 68K
