@@ -174,6 +174,8 @@ RLoss_Index:	dc.w RLoss_Count-RLoss_Index
 		dc.w RLoss_Collect-RLoss_Index
 		dc.w RLoss_Sparkle-RLoss_Index
 		dc.w RLoss_Delete-RLoss_Index
+
+rloss_timer:	equ obDelayAni	; time until lost ring expires
 ; ===========================================================================
 
 RLoss_Count:	; Routine 0
@@ -208,13 +210,21 @@ RLoss_Count:	; Routine 0
 		move.b	#3,obPriority(a1)
 		move.b	#$47,obColType(a1)
 		move.b	#8,obActWid(a1)
-		move.b	#-1,(v_ani3_time).w
 		tst.w	d4
 		bmi.s	.loc_9D62
 		move.w	d4,d0
 		bsr.w	CalcSine
 		move.w	d4,d2
 		lsr.w	#8,d2
+		tst.b	(f_water).w		; does the level have water?
+		beq.s	.skiphalvingvel		; if not, branch and skip underwater checks
+		move.w	(v_waterpos1).w,d6	; move water level to d6
+		cmp.w	obY(a0),d6		; is the ring object underneath the water level?
+		bgt.s	.skiphalvingvel		; if not, branch and skip underwater commands
+		asr.w	d0			; half d0. makes the ring's x_vel bounce to the left/right slower
+		asr.w	d1			; half d1. makes the ring's y_vel bounce up/down slower
+
+.skiphalvingvel:
 		asl.w	d2,d0
 		asl.w	d2,d1
 		move.w	d0,d2
@@ -236,12 +246,23 @@ RLoss_Count:	; Routine 0
 		move.w	#0,(v_rings).w	; reset number of rings to zero
 		move.b	#$80,(f_ringcount).w ; update ring counter
 		move.b	#0,(v_lifecount).w
+		moveq	#-1,d0					; move #-1 to d0
+		move.b	d0,rloss_timer(a0)		; move d0 to new timer
+		move.b	d0,(v_ani3_time).w		; move d0 to old timer (for animated purposes)
 		sfx	sfx_RingLoss,0,0,0	; play ring loss sound
 
 RLoss_Bounce:	; Routine 2
 		move.b	(v_ani3_frame).w,obFrame(a0)
 		bsr.w	SpeedToPos
 		addi.w	#$18,obVelY(a0)
+		tst.b	(f_water).w		; does the level have water?
+		beq.s	.skipbounceslow		; if not, branch and skip underwater checks
+		move.w	(v_waterpos1).w,d6	; move water level to d6
+		cmp.w	obY(a0),d6		; is the ring object underneath the water level?
+		bgt.s	.skipbounceslow		; if not, branch and skip underwater commands
+		subi.w	#$E,obVelY(a0)		; reduce gravity by $E ($18-$E=$A), giving the underwater effect
+
+.skipbounceslow:
 		bmi.s	.chkdel
 		move.b	(v_vbla_byte).w,d0
 		add.b	d7,d0
@@ -257,13 +278,20 @@ RLoss_Bounce:	; Routine 2
 		neg.w	obVelY(a0)
 
 	.chkdel:
-		tst.b	(v_ani3_time).w
+		subq.b	#1,rloss_timer(a0)		; subtract 1
+		beq.w	DeleteObject			; if 0, delete
 		beq.s	RLoss_Delete
+		cmpi.w	#$FF00,(v_limittop2).w		; is vertical wrapping enabled?
+		beq.w	DisplaySprite			; if so, branch
 		move.w	(v_limitbtm2).w,d0
 		addi.w	#$E0,d0
 		cmp.w	obY(a0),d0	; has object moved below level boundary?
 		bcs.s	RLoss_Delete	; if yes, branch
-		bra.w	DisplaySprite
+		btst	#0,rloss_timer(a0)	; test the first bit of the timer, so rings flash every other frame
+		beq.w	DisplaySprite		; if the bit is 0, the ring will appear
+		cmpi.b	#80,rloss_timer(a0)	; rings will flash during last 80 steps of their life
+		bhi.w	DisplaySprite		; if the timer is higher than 80, obviously the rings will STAY visible
+		rts
 ; ===========================================================================
 
 RLoss_Collect:	; Routine 4

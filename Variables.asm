@@ -226,6 +226,7 @@ v_levselmenu	=	ramaddr ( $FFFFFF86 )	; level select - submenu (2 bytes)
 v_levselmax		=	ramaddr ( $FFFFFF88 )	; level select - max selection (2 bytes)
 v_levselss		=	ramaddr ( $FFFFFF8A )	; level select - SS index (2 bytes)
 f_debughud		=	ramaddr ( $FFFFFF8C )	; debug HUD flag
+f_skiplvlfade	=	ramaddr ( $FFFFFF8D )	; skip level fade
 v_scorecopy	=	ramaddr ( $FFFFFFC0 )	; score, duplicate (4 bytes)
 v_scorelife	=	ramaddr ( $FFFFFFC0 )	; points required for an extra life (4 bytes) (JP1 only)
 v_colladdr1	=	ramaddr ( $FFFFFFD0 )	; (4 bytes)

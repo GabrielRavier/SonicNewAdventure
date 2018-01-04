@@ -618,11 +618,7 @@ VBla_08:
 
 		writeVRAM	v_hscrolltablebuffer,$380,vram_hscroll
 		writeVRAM	v_spritetablebuffer,$280,vram_sprites
-		tst.b	(f_sonframechg).w ; has Sonic's sprite changed?
-		beq.s	.nochg		; if not, branch
-
-		writeVRAM	v_sgfx_buffer,$2E0,vram_sonic ; load new Sonic gfx
-		move.b	#0,(f_sonframechg).w
+		jsr	(ProcessDMAQueue).l
 
 	.nochg:
 		startZ80
@@ -667,11 +663,7 @@ VBla_0A:
 		writeVRAM	v_hscrolltablebuffer,$380,vram_hscroll
 		startZ80
 		bsr.w	PalCycle_SS
-		tst.b	(f_sonframechg).w ; has Sonic's sprite changed?
-		beq.s	.nochg		; if not, branch
-
-		writeVRAM	v_sgfx_buffer,$2E0,vram_sonic ; load new Sonic gfx
-		move.b	#0,(f_sonframechg).w
+		jsr	(ProcessDMAQueue).l
 
 	.nochg:
 		tst.w	(v_demolength).w
@@ -699,10 +691,7 @@ VBla_0C:
 		move.w	(v_hbla_hreg).w,(a5)
 		writeVRAM	v_hscrolltablebuffer,$380,vram_hscroll
 		writeVRAM	v_spritetablebuffer,$280,vram_sprites
-		tst.b	(f_sonframechg).w
-		beq.s	.nochg
-		writeVRAM	v_sgfx_buffer,$2E0,vram_sonic
-		move.b	#0,(f_sonframechg).w
+		jsr	(ProcessDMAQueue).l
 
 	.nochg:
 		startZ80
@@ -738,10 +727,7 @@ VBla_16:
 		writeVRAM	v_spritetablebuffer,$280,vram_sprites
 		writeVRAM	v_hscrolltablebuffer,$380,vram_hscroll
 		startZ80
-		tst.b	(f_sonframechg).w
-		beq.s	.nochg
-		writeVRAM	v_sgfx_buffer,$2E0,vram_sonic
-		move.b	#0,(f_sonframechg).w
+		jsr	(ProcessDMAQueue).l
 
 	.nochg:
 		tst.w	(v_demolength).w
@@ -1035,6 +1021,102 @@ TilemapToVRAM:
 		rts	
 ; End of function TilemapToVRAM
 
+; ---------------------------------------------------------------------------
+; Subroutine for queueing VDP commands (seems to only queue transfers to VRAM),
+; to be issued the next time ProcessDMAQueue is called.
+; Can be called a maximum of 18 times before the buffer needs to be cleared
+; by issuing the commands (this subroutine DOES check for overflow)
+; ---------------------------------------------------------------------------
+; In case you wish to use this queue system outside of the spin dash, this is the
+; registers in which it expects data in:
+; d1.l: Address to data (In 68k address space)
+; d2.w: Destination in VRAM
+; d3.w: Length of data
+; ---------------------------------------------------------------------------
+
+; ||||||||||||||| S U B R O U T I N E |||||||||||||||||||||||||||||||||||||||
+
+; sub_144E: DMA_68KtoVRAM: QueueCopyToVRAM: QueueVDPCommand: Add_To_DMA_Queue:
+QueueDMATransfer:
+		movea.l	($FFFFC8FC).w,a1
+		cmpa.w	#$C8FC,a1
+		beq.s	QueueDMATransfer_Done ; return if there's no more room in the buffer
+
+		; piece together some VDP commands and store them for later...
+		move.w	#$9300,d0 ; command to specify DMA transfer length & $00FF
+		move.b	d3,d0
+		move.w	d0,(a1)+ ; store command
+
+		move.w	#$9400,d0 ; command to specify DMA transfer length & $FF00
+		lsr.w	#8,d3
+		move.b	d3,d0
+		move.w	d0,(a1)+ ; store command
+
+		move.w	#$9500,d0 ; command to specify source address & $0001FE
+		lsr.l	#1,d1
+		move.b	d1,d0
+		move.w	d0,(a1)+ ; store command
+
+		move.w	#$9600,d0 ; command to specify source address & $01FE00
+		lsr.l	#8,d1
+		move.b	d1,d0
+		move.w	d0,(a1)+ ; store command
+
+		move.w	#$9700,d0 ; command to specify source address & $FE0000
+		lsr.l	#8,d1
+		move.b	d1,d0
+		move.w	d0,(a1)+ ; store command
+
+		andi.l	#$FFFF,d2 ; command to specify destination address and begin DMA
+		lsl.l	#2,d2
+		lsr.w	#2,d2
+		swap	d2
+		ori.l	#$40000080,d2 ; set bits to specify VRAM transfer
+		move.l	d2,(a1)+ ; store command
+
+		move.l	a1,($FFFFC8FC).w ; set the next free slot address
+		cmpa.w	#$C8FC,a1
+		beq.s	QueueDMATransfer_Done ; return if there's no more room in the buffer
+		move.w	#0,(a1) ; put a stop token at the end of the used part of the buffer
+; return_14AA:
+QueueDMATransfer_Done:
+		rts
+; End of function QueueDMATransfer
+
+
+; ---------------------------------------------------------------------------
+; Subroutine for issuing all VDP commands that were queued
+; (by earlier calls to QueueDMATransfer)
+; Resets the queue when it's done
+; ---------------------------------------------------------------------------
+
+; ||||||||||||||| S U B R O U T I N E |||||||||||||||||||||||||||||||||||||||
+
+; sub_14AC: CopyToVRAM: IssueVDPCommands: Process_DMA: Process_DMA_Queue:
+ProcessDMAQueue:
+		lea	($C00004).l,a5
+		lea	($FFFFC800).w,a1
+; loc_14B6:
+ProcessDMAQueue_Loop:
+		move.w	(a1)+,d0
+		beq.s	ProcessDMAQueue_Done ; branch if we reached a stop token
+		; issue a set of VDP commands...
+		move.w	d0,(a5)		; transfer length
+		move.w	(a1)+,(a5)	; transfer length
+		move.w	(a1)+,(a5)	; source address
+		move.w	(a1)+,(a5)	; source address
+		move.w	(a1)+,(a5)	; source address
+		move.w	(a1)+,(a5)	; destination
+		move.w	(a1)+,(a5)	; destination
+		cmpa.w	#$C8FC,a1
+		bne.s	ProcessDMAQueue_Loop ; loop if we haven't reached the end of the buffer
+; loc_14CE:
+ProcessDMAQueue_Done:
+		move.w	#0,($FFFFC800).w
+		move.l	#$FFFFC800,($FFFFC8FC).w
+		rts
+; End of function ProcessDMAQueue
+
 		include	"_inc/Nemesis Decompression.asm"
 
 ; ---------------------------------------------------------------------------
@@ -1139,7 +1221,6 @@ RunPLC:
 
 loc_160E:
 		andi.w	#$7FFF,d2
-		move.w	d2,(f_plc_execute).w
 		bsr.w	NemDec4
 		move.b	(a0)+,d5
 		asl.w	#8,d5
@@ -1153,6 +1234,7 @@ loc_160E:
 		move.l	d0,($FFFFF6EC).w
 		move.l	d5,($FFFFF6F0).w
 		move.l	d6,($FFFFF6F4).w
+		move.w	d2,(f_plc_execute).w
 
 Rplc_Exit:
 		rts	
@@ -1307,15 +1389,20 @@ PalFadeIn_Alt:				; start position and size are already set
 		move.w	d1,(a0)+
 		dbf	d0,.fill 	; fill palette with black
 
-		move.w	#$15,d4
+		moveq	#$E,d4					; MJ: prepare maximum colour check
+		moveq	#0,d6					; MJ: clear d6
 
 	.mainloop:
+		bsr.w	RunPLC
 		move.b	#$12,(v_vbla_routine).w
 		bsr.w	WaitForVBla
+		bchg	#0,d6					; MJ: change delay counter
+		beq.s	.mainloop				; MJ: if null, delay a frame
 		bsr.s	FadeIn_FromBlack
-		bsr.w	RunPLC
-		dbf	d4,.mainloop
-		rts	
+		subq.b	#2,d4					; MJ: decrease colour check
+		bne.s	.mainloop				; MJ: if it has not reached null, branch
+		move.b	#$12,(v_vbla_routine).w			; MJ: wait for V-blank again (so colours transfer)
+		bra.w	WaitForVBla						; MJ: ''
 ; End of function PaletteFadeIn
 
 
@@ -1359,36 +1446,29 @@ FadeIn_FromBlack:
 
 
 FadeIn_AddColour:
-.addblue:
-		move.w	(a1)+,d2
-		move.w	(a0),d3
-		cmp.w	d2,d3		; is colour already at threshold level?
-		beq.s	.next		; if yes, branch
-		move.w	d3,d1
-		addi.w	#$200,d1	; increase blue	value
-		cmp.w	d2,d1		; has blue reached threshold level?
-		bhi.s	.addgreen	; if yes, branch
-		move.w	d1,(a0)+	; update palette
-		rts	
-; ===========================================================================
+		move.b	(a1),d5					; MJ: load blue
+		move.w	(a1)+,d1				; MJ: load green and red
+		move.b	d1,d2					; MJ: load red
+		lsr.b	#4,d1					; MJ: get only green
+		andi.b	#$E,d2					; MJ: get only red
+		move.w	(a0),d3					; MJ: load current colour in buffer
+		cmp.b	d5,d4					; MJ: is it time for blue to fade?
+		bhi.s	.noblue				; MJ: if not, branch
+		addi.w	#$200,d3				; MJ: increase blue
 
-.addgreen:
-		move.w	d3,d1
-		addi.w	#$20,d1		; increase green value
-		cmp.w	d2,d1
-		bhi.s	.addred
-		move.w	d1,(a0)+	; update palette
-		rts	
-; ===========================================================================
+.noblue:
+		cmp.b	d1,d4					; MJ: is it time for green to fade?
+		bhi.s	.nogreen				; MJ: if not, branch
+		addi.b	#$20,d3					; MJ: increase green
 
-.addred:
-		addq.w	#2,(a0)+	; increase red value
-		rts	
-; ===========================================================================
+.nogreen:
+		cmp.b	d2,d4					; MJ: is it time for red to fade?
+		bhi.s	.nored				; MJ: if not, branch
+		addq.b	#2,d3					; MJ: increase red
 
-.next:
-		addq.w	#2,a0		; next colour
-		rts	
+.nored:
+		move.w	d3,(a0)+				; MJ: save colour
+		rts						; MJ: return
 ; End of function FadeIn_AddColour
 
 
@@ -1402,13 +1482,16 @@ FadeIn_AddColour:
 
 PaletteFadeOut:
 		move.w	#$003F,(v_pfade_start).w ; start position = 0; size = $40
-		move.w	#$15,d4
+		moveq	#7,d4					; MJ: set repeat times
+		moveq	#0,d6					; MJ: clear d6
 
 	.mainloop:
+		bsr.w	RunPLC
 		move.b	#$12,(v_vbla_routine).w
 		bsr.w	WaitForVBla
+		bchg	#0,d6					; MJ: change delay counter
+		beq.s	.mainloop				; MJ: if null, delay a frame
 		bsr.s	FadeOut_ToBlack
-		bsr.w	RunPLC
 		dbf	d4,.mainloop
 		rts	
 ; End of function PaletteFadeOut
@@ -1445,35 +1528,27 @@ FadeOut_ToBlack:
 
 
 FadeOut_DecColour:
-.dered:
-		move.w	(a0),d2
-		beq.s	.next
-		move.w	d2,d1
-		andi.w	#$E,d1
-		beq.s	.degreen
-		subq.w	#2,(a0)+	; decrease red value
-		rts	
-; ===========================================================================
+		move.w	(a0),d5					; MJ: load colour
+		move.w	d5,d1					; MJ: copy to d1
+		move.b	d1,d2					; MJ: load green and red
+		move.b	d1,d3					; MJ: load red
+		andi.w	#$E00,d1				; MJ: get only blue
+		beq.s	.noblue					; MJ: if blue is finished, branch
+		subi.w	#$200,d5				; MJ: decrease blue
 
-.degreen:
-		move.w	d2,d1
-		andi.w	#$E0,d1
-		beq.s	.deblue
-		subi.w	#$20,(a0)+	; decrease green value
-		rts	
-; ===========================================================================
+.noblue:
+		andi.w	#$E0,d2					; MJ: get only green (needs to be word)
+		beq.s	.nogreen				; MJ: if green is finished, branch
+		subi.b	#$20,d5					; MJ: decrease green
 
-.deblue:
-		move.w	d2,d1
-		andi.w	#$E00,d1
-		beq.s	.next
-		subi.w	#$200,(a0)+	; decrease blue	value
-		rts	
-; ===========================================================================
+.nogreen:
+		andi.b	#$E,d3					; MJ: get only red
+		beq.s	.nored					; MJ: if red is finished, branch
+		subq.b	#2,d5					; MJ: decrease red
 
-.next:
-		addq.w	#2,a0
-		rts	
+.nored:
+		move.w	d5,(a0)+				; MJ: save new colour
+		rts						; MJ: return
 ; End of function FadeOut_DecColour
 
 ; ---------------------------------------------------------------------------
@@ -2055,15 +2130,16 @@ GM_Title:
 		move.w	#0,(v_debuguse).w ; disable debug item placement mode
 		move.w	#0,(f_demo).w	; disable debug mode
 		move.w	#0,($FFFFFFEA).w ; unused variable
+		move.b	#0,(f_nobgscroll).w
 		move.w	#(id_GHZ<<8),(v_zone).w	; set level to GHZ (00)
 		move.w	#0,(v_pcyc_time).w ; disable palette cycling
 		bsr.w	LevelSizeLoad
 		bsr.w	DeformLayers
 		lea	(v_16x16).w,a1
-		lea	(Blk16_GHZ).l,a0 ; load	GHZ 16x16 mappings
+		lea	(Blk16_Title).l,a0 ; load	title 16x16 mappings
 		move.w	#0,d0
 		bsr.w	EniDec
-		lea	(Blk128_GHZ).l,a0 ; load GHZ 128x128 mappings
+		lea	(Blk128_Title).l,a0 ; load title 128x128 mappings
 		lea	(v_128x128).l,a1
 		bsr.w	KosDec
 		bsr.w	LevelLayoutLoad
@@ -2084,7 +2160,7 @@ GM_Title:
 		copyTilemap	$FF0000,$C208,$21,$15
 
 		locVRAM	0
-		lea	(Nem_GHZ_1st).l,a0 ; load GHZ patterns
+		lea	(Nem_Title).l,a0 ; load title screen patterns
 		bsr.w	NemDec
 		moveq	#palid_GHZ,d0	; load GHZ palette
 		bsr.w	PalLoad1
@@ -2092,7 +2168,7 @@ GM_Title:
 		bsr.w	PalLoad1
 		sfx	bgm_Title,0,1,1	; play title screen music
 		move.b	#0,(f_debugmode).w ; disable debug mode
-		move.w	#$178,(v_demolength).w ; run title screen for $178 frames
+		move.w	#$3ED,(v_demolength).w ; run title screen for $3ED frames
 		lea	(v_objspace+$80).w,a1
 		moveq	#0,d0
 		move.w	#$F,d1
@@ -2217,9 +2293,8 @@ GM_LevSel:
 		bsr.w	PaletteFadeOut
 		bsr.w	ClearScreen
 		disable_ints
-		lea	(vdp_data_port).l,a6
-		locVRAM	0
-		lea	(Nem_LevSelBG).l,a0 ; load level select BG tiles
+		locVRAM	$4000
+		lea	(Nem_LevSelBG).l,a0 ; load level select BG patterns
 		bsr.w	NemDec
 		lea	($FF0000).l,a1
 		lea	(Eni_LevSelBG).l,a0 ; load mappings for	level select BG
@@ -2256,7 +2331,7 @@ GM_LevSel:
 		bsr.w	PaletteFadeIn
 
 LevelSelect:
-		move.b	#4,(v_vbla_routine).w
+		move.b	#2,(v_vbla_routine).w
 		bsr.w	WaitForVBla
 		bsr.w	LevSelControls
 		bsr.w	RunPLC
@@ -2357,6 +2432,9 @@ PlayLevel:
 			move.l	#5000,(v_scorelife).w ; extra life is awarded at 50000 points
 		endif
 		sfx	bgm_Fade,0,1,1 ; fade out music
+		bsr.w	PaletteFadeOut
+		move.b	#1,(f_skiplvlfade).w
+		bsr.w	ClearScreen
 		rts	
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
@@ -2768,7 +2846,11 @@ GM_Level:
 
 	Level_NoMusicFade:
 		bsr.w	ClearPLC
+		tst.b	(f_skiplvlfade).w
+		bne.s	.nofade
 		bsr.w	PaletteFadeOut
+	.nofade:
+		move.b	#0,(f_skiplvlfade).w
 		tst.w	(f_demo).w	; is an ending sequence demo running?
 		bmi.s	Level_ClrRam	; if yes, branch
 		disable_ints
@@ -2778,7 +2860,11 @@ GM_Level:
 		enable_ints
 		moveq	#0,d0
 		move.b	(v_zone).w,d0
-		lsl.w	#4,d0
+		lsl.w	#6,d0
+		moveq	#0,d1
+		move.b	(v_act).w,d1
+		lsl.w	#4,d1
+		add.w	d1,d0
 		lea	(LevelHeaders).l,a2
 		lea	(a2,d0.w),a2
 		moveq	#0,d0
@@ -2822,7 +2908,9 @@ Level_ClrRam:
 	Level_ClrVars3:
 		move.l	d0,(a1)+
 		dbf	d1,Level_ClrVars3 ; clear object variables
-
+		
+		clr.w	($FFFFC800).w
+		move.l	#$FFFFC800,($FFFFC8FC).w
 		disable_ints
 		bsr.w	ClearScreen
 		lea	(vdp_control_port).l,a6
@@ -2875,18 +2963,15 @@ Level_GetBgm:
 		bmi.s	Level_SkipTtlCard
 		moveq	#0,d0
 		move.b	(v_zone).w,d0
-		cmpi.w	#(id_LZ<<8)+3,(v_zone).w ; is level SBZ3?
-		bne.s	Level_BgmNotLZ4	; if not, branch
-		moveq	#5,d0		; use 5th music (SBZ)
-
-	Level_BgmNotLZ4:
-		cmpi.w	#(id_SBZ<<8)+2,(v_zone).w ; is level FZ?
-		bne.s	Level_PlayBgm	; if not, branch
-		moveq	#6,d0		; use 6th music (FZ)
-
-	Level_PlayBgm:
-		lea	(MusicList).l,a1 ; load	music playlist
-		move.b	(a1,d0.w),d0
+		lsl.w	#6,d0
+		moveq	#0,d1
+		move.b	(v_act).w,d1
+		lsl.w	#4,d1
+		add.w	d1,d0
+		lea	(LevelHeaders).l,a2
+		lea	(a2,d0.w),a2
+		adda.l	#$C,a2
+		move.w	(a2),d0
 		bsr.w	PlaySound	; play music
 		move.b	#id_TitleCard,(v_objspace+$80).w ; load title card object
 
@@ -2909,7 +2994,8 @@ Level_TtlCardLoop:
 		bsr.w	LevelSizeLoad
 		bsr.w	DeformLayers
 		bset	#2,(v_bgscroll1).w
-		bsr.w	LevelDataLoad ; load block mappings and palettes
+		bsr.w	LoadZoneTiles	; load level art
+		bsr.w	LevelDataLoad	; load block mappings and palettes
 		bsr.w	LoadTilesFromStart
 		jsr	(FloorLog_Unk).l
 		bsr.w	ColIndexLoad
@@ -3418,6 +3504,8 @@ loc_47D4:
 		lea	(Nem_TitleCard).l,a0 ; load title card patterns
 		bsr.w	NemDec
 		jsr	(Hud_Base).l
+		clr.w	($FFFFC800).w
+		move.l	#$FFFFC800,($FFFFC8FC).w
 		enable_ints
 		moveq	#palid_SSResult,d0
 		bsr.w	PalLoad2	; load results screen palette
@@ -4141,7 +4229,11 @@ GM_Credits:
 		bsr.w	EndingDemoLoad
 		moveq	#0,d0
 		move.b	(v_zone).w,d0
-		lsl.w	#4,d0
+		lsl.w	#6,d0
+		moveq	#0,d1
+		move.b	(v_act).w,d1
+		lsl.w	#4,d1
+		add.w	d1,d0
 		lea	(LevelHeaders).l,a2
 		lea	(a2,d0.w),a2
 		moveq	#0,d0
@@ -5213,11 +5305,67 @@ DrawChunks:
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
+LoadZoneTiles:
+		moveq	#0,d0
+		move.b	(v_zone).w,d0
+		lsl.w	#6,d0
+		moveq	#0,d1
+		move.b	(v_act).w,d1
+		lsl.w	#4,d1
+		add.w	d1,d0
+		lea	(LevelHeaders).l,a2	; Load LevelHeaders's address into a2
+		lea	(a2,d0.w),a2		; Offset LevelHeaders by the zone-offset, and load the resultant address to a2
+		move.l	(a2)+,d0		; Move the first longword of data that a2 points to to d0, this contains the zone's first PLC ID and its art's address.
+						; The auto increment is pointless as a2 is overwritten later, and nothing reads from a2 before then
+		andi.l	#$FFFFFF,d0    		; Filter out the first byte, which contains the first PLC ID, leaving the address of the zone's art in d0
+		movea.l	d0,a0			; Load the address of the zone's art into a0 (source)
+		lea	($FF0000).l,a1		; Load v_256x256/StartOfRAM (in this context, an art buffer) into a1 (destination)
+		bsr.w	KosDec			; Decompress a0 to a1 (Kosinski compression)
+
+		move.w	a1,d3			; Move a word of a1 to d3, note that a1 doesn't exactly contain the address of v_256x256/StartOfRAM anymore, after KosDec, a1 now contains v_256x256/StartOfRAM + the size of the file decompressed to it, d3 now contains the length of the file that was decompressed
+		move.w	d3,d7			; Move d3 to d7, for use in seperate calculations
+
+		andi.w	#$FFF,d3		; Remove the high nibble of the high byte of the length of decompressed file, this nibble is how many $1000 bytes the decompressed art is
+		lsr.w	#1,d3			; Half the value of 'length of decompressed file', d3 becomes the 'DMA transfer length'
+
+		rol.w	#4,d7			; Rotate (left) length of decompressed file by one nibble
+		andi.w	#$F,d7			; Only keep the low nibble of low byte (the same one filtered out of d3 above), this nibble is how many $1000 bytes the decompressed art is
+
+.loop:
+		move.w	d7,d2			; Move d7 to d2, note that the ahead dbf removes 1 byte from d7 each time it loops, meaning that the following calculations will have different results each time
+		lsl.w	#7,d2
+		lsl.w	#5,d2			; Shift (left) d2 by $C, making it high nibble of the high byte, d2 is now the size of the decompressed file rounded down to the nearest $1000 bytes, d2 becomes the 'destination address'
+
+		move.l	#$FFFFFF,d1		; Fill d1 with $FF
+		move.w	d2,d1			; Move d2 to d1, overwriting the last word of $FF's with d2, this turns d1 into 'StartOfRAM'+'However many $1000 bytes the decompressed art is', d1 becomes the 'source address'
+
+		jsr	(QueueDMATransfer).l	; Use d1, d2, and d3 to locate the decompressed art and ready for transfer to VRAM
+		move.w	d7,-(sp)		; Store d7 in the Stack
+		move.b	#$C,(v_vbla_routine).w
+		bsr.w	WaitForVBla
+		bsr.w	RunPLC
+		move.w	(sp)+,d7		; Restore d7 from the Stack
+		move.w	#$800,d3		; Force the DMA transfer length to be $1000/2 (the first cycle is dynamic because the art's DMA'd backwards)
+		dbf	d7,.loop		; Loop for each $1000 bytes the decompressed art is
+
+		rts
+; End of function LoadZoneTiles
+
+; ---------------------------------------------------------------------------
+; Subroutine to load basic level data
+; ---------------------------------------------------------------------------
+
+; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
+
 
 LevelDataLoad:
 		moveq	#0,d0
 		move.b	(v_zone).w,d0
-		lsl.w	#4,d0
+		lsl.w	#6,d0
+		moveq	#0,d1
+		move.b	(v_act).w,d1
+		lsl.w	#4,d1
+		add.w	d1,d0
 		lea	(LevelHeaders).l,a2
 		lea	(a2,d0.w),a2
 		move.l	a2,-(sp)
@@ -5233,20 +5381,6 @@ LevelDataLoad:
 		move.w	(a2)+,d0
 		move.w	(a2),d0
 		andi.w	#$FF,d0
-		cmpi.w	#(id_LZ<<8)+3,(v_zone).w ; is level SBZ3 (LZ4) ?
-		bne.s	.notSBZ3	; if not, branch
-		moveq	#palid_SBZ3,d0	; use SB3 palette
-
-	.notSBZ3:
-		cmpi.w	#(id_SBZ<<8)+1,(v_zone).w ; is level SBZ2?
-		beq.s	.isSBZorFZ	; if yes, branch
-		cmpi.w	#(id_SBZ<<8)+2,(v_zone).w ; is level FZ?
-		bne.s	.normalpal	; if not, branch
-
-	.isSBZorFZ:
-		moveq	#palid_SBZ2,d0	; use SBZ2/FZ palette
-
-	.normalpal:
 		bsr.w	PalLoad1	; load palette (based on d0)
 		movea.l	(sp)+,a2
 		addq.w	#4,a2		; read number for 2nd PLC
@@ -6165,6 +6299,8 @@ loc_D358:
 ; ===========================================================================
 
 loc_D362:
+		cmpi.b	#$A,(v_player+obRoutine).w		; has Sonic drowned?
+		beq.s	loc_D348						; if so, run objects a little longer
 		moveq	#$1F,d7
 		bsr.s	loc_D348
 		moveq	#$5F,d7
@@ -6643,6 +6779,9 @@ loc_DA02:
 loc_DA10:
 		bsr.w	loc_DA3C
 		beq.s	loc_DA02
+		tst.b	4(a0)		; MJ: was this object a remember state?
+		bpl.s	loc_DA16	; MJ: if not, branch
+		subq.b	#1,(a2)		; MJ: move right counter back
 
 loc_DA16:
 		move.l	a0,(v_opl_data).w
@@ -6672,7 +6811,7 @@ locret_DA3A:
 loc_DA3C:
 		tst.b	4(a0)
 		bpl.s	OPL_MakeItem
-		bset	#7,2(a2,d2.w)
+		btst	#7,2(a2,d2.w)
 		beq.s	OPL_MakeItem
 		addq.w	#6,a0
 		moveq	#0,d0
@@ -6693,6 +6832,7 @@ OPL_MakeItem:
 		move.b	d1,obStatus(a1)
 		move.b	(a0)+,d0
 		bpl.s	loc_DA80
+		bset	#7,2(a2,d2.w)		; MJ: set as removed
 		andi.b	#$7F,d0
 		move.b	d2,obRespawnNo(a1)
 
@@ -6850,6 +6990,7 @@ Sonic_Index:	dc.w Sonic_Main-Sonic_Index
 		dc.w Sonic_Hurt-Sonic_Index
 		dc.w Sonic_Death-Sonic_Index
 		dc.w Sonic_ResetLevel-Sonic_Index
+		dc.w Sonic_Drowned-Sonic_Index
 ; ===========================================================================
 
 Sonic_Main:	; Routine 0
@@ -7021,6 +7162,7 @@ locret_13302:
 		include	"_incObj/Sonic ResetOnFloor.asm"
 		include	"_incObj/Sonic (part 2).asm"
 		include	"_incObj/Sonic Loops.asm"
+		include	"_incObj/Sonic Drowns.asm"
 		include	"_incObj/Sonic Animate.asm"
 		include	"_anim/Sonic.asm"
 		include	"_incObj/Sonic LoadGfx.asm"
@@ -8801,23 +8943,27 @@ Nem_Squirrel:	binclude	"artnem/Animal Squirrel.bin"
 ; ---------------------------------------------------------------------------
 ; Compressed graphics - primary patterns and block mappings
 ; ---------------------------------------------------------------------------
+Blk16_Title:	binclude	"map16/Title.bin"
+		even
+Nem_Title:	binclude	"artnem/8x8 - Title.bin"	; Title primary patterns
+		even
+Blk128_Title:	binclude	"map128/Title.bin"
+		even
 Blk16_GHZ:	binclude	"map16/GHZ.bin"
 		even
-Nem_GHZ_1st:	binclude	"artnem/8x8 - GHZ1.bin"	; GHZ primary patterns
-		even
-Nem_GHZ_2nd:	binclude	"artnem/8x8 - GHZ2.bin"	; GHZ secondary patterns
+Kos_GHZ:	binclude	"artkos/8x8 - GHZ.bin"	; GHZ primary patterns
 		even
 Blk128_GHZ:	binclude	"map128/GHZ.bin"
 		even
 Blk16_LZ:	binclude	"map16/LZ.bin"
 		even
-Nem_LZ:		binclude	"artnem/8x8 - LZ.bin"	; LZ primary patterns
+Kos_LZ:		binclude	"artkos/8x8 - LZ.bin"	; LZ primary patterns
 		even
 Blk128_LZ:	binclude	"map128/LZ.bin"
 		even
 Blk16_MZ:	binclude	"map16/MZ.bin"
 		even
-Nem_MZ:		binclude	"artnem/8x8 - MZ.bin"	; MZ primary patterns
+Kos_MZ:		binclude	"artkos/8x8 - MZ.bin"	; MZ primary patterns
 		even
 Blk128_MZ:	if Revision=0
 		binclude	"map128/MZ.bin"
@@ -8827,19 +8973,19 @@ Blk128_MZ:	if Revision=0
 		even
 Blk16_SLZ:	binclude	"map16/SLZ.bin"
 		even
-Nem_SLZ:	binclude	"artnem/8x8 - SLZ.bin"	; SLZ primary patterns
+Kos_SLZ:	binclude	"artkos/8x8 - SLZ.bin"	; SLZ primary patterns
 		even
 Blk128_SLZ:	binclude	"map128/SLZ.bin"
 		even
 Blk16_SYZ:	binclude	"map16/SYZ.bin"
 		even
-Nem_SYZ:	binclude	"artnem/8x8 - SYZ.bin"	; SYZ primary patterns
+Kos_SYZ:	binclude	"artkos/8x8 - SYZ.bin"	; SYZ primary patterns
 		even
 Blk128_SYZ:	binclude	"map128/SYZ.bin"
 		even
 Blk16_SBZ:	binclude	"map16/SBZ.bin"
 		even
-Nem_SBZ:	binclude	"artnem/8x8 - SBZ.bin"	; SBZ primary patterns
+Kos_SBZ:	binclude	"artkos/8x8 - SBZ.bin"	; SBZ primary patterns
 		even
 Blk128_SBZ:	if Revision=0
 		binclude	"map128/SBZ.bin"

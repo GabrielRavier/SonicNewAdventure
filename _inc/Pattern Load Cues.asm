@@ -79,8 +79,6 @@ PLC_GameOver:	dc.w ((PLC_GameOverend-PLC_GameOver-2)/6)-1
 ; Pattern load cues - Green Hill
 ; ---------------------------------------------------------------------------
 PLC_GHZ:	dc.w ((PLC_GHZ2-PLC_GHZ-2)/6)-1
-		plcm	Nem_GHZ_1st, 0		; GHZ main patterns
-		plcm	Nem_GHZ_2nd, $39A0	; GHZ secondary	patterns
 		plcm	Nem_Stalk, $6B00	; flower stalk
 		plcm	Nem_PplRock, $7A00	; purple rock
 		plcm	Nem_Crabmeat, $8000	; crabmeat enemy
@@ -104,7 +102,6 @@ PLC_GHZ2:	dc.w ((PLC_GHZ2end-PLC_GHZ2-2)/6)-1
 ; Pattern load cues - Labyrinth
 ; ---------------------------------------------------------------------------
 PLC_LZ:		dc.w ((PLC_LZ2-PLC_LZ-2)/6)-1
-		plcm	Nem_LZ,0		; LZ main patterns
 		plcm	Nem_LzBlock1, $3C00	; block
 		plcm	Nem_LzBlock2, $3E00	; blocks
 		plcm	Nem_Splash, $4B20	; waterfalls and splash
@@ -114,7 +111,7 @@ PLC_LZ:		dc.w ((PLC_LZ2-PLC_LZ-2)/6)-1
 		plcm	Nem_Bubbles, $6900	; bubbles and numbers
 		plcm	Nem_LzBlock3, $7780	; block
 		plcm	Nem_LzDoor1, $7880	; vertical door
-		plcm	Nem_Harpoon, $7980	; harpoon
+		plcm	Nem_LzSwitch, $A1E0	; switch
 		plcm	Nem_Burrobot, $94C0	; burrobot enemy
 
 PLC_LZ2:	dc.w ((PLC_LZ2end-PLC_LZ2-2)/6)-1
@@ -139,7 +136,6 @@ PLC_LZ2:	dc.w ((PLC_LZ2end-PLC_LZ2-2)/6)-1
 ; Pattern load cues - Marble
 ; ---------------------------------------------------------------------------
 PLC_MZ:		dc.w ((PLC_MZ2-PLC_MZ-2)/6)-1
-		plcm	Nem_MZ,0		; MZ main patterns
 		plcm	Nem_MzMetal, $6000	; metal	blocks
 		plcm	Nem_MzFire, $68A0	; fireballs
 		plcm	Nem_Swing, $7000	; swinging platform
@@ -161,7 +157,6 @@ PLC_MZ2:	dc.w ((PLC_MZ2end-PLC_MZ2-2)/6)-1
 ; Pattern load cues - Star Light
 ; ---------------------------------------------------------------------------
 PLC_SLZ:	dc.w ((PLC_SLZ2-PLC_SLZ-2)/6)-1
-		plcm	Nem_SLZ,0		; SLZ main patterns
 		plcm	Nem_Bomb, $8000		; bomb enemy
 		plcm	Nem_Orbinaut, $8520	; orbinaut enemy
 		plcm	Nem_MzFire, $9000	; fireballs
@@ -183,7 +178,6 @@ PLC_SLZ2:	dc.w ((PLC_SLZ2end-PLC_SLZ2-2)/6)-1
 ; Pattern load cues - Spring Yard
 ; ---------------------------------------------------------------------------
 PLC_SYZ:	dc.w ((PLC_SYZ2-PLC_SYZ-2)/6)-1
-		plcm	Nem_SYZ,0		; SYZ main patterns
 		plcm	Nem_Crabmeat, $8000	; crabmeat enemy
 		plcm	Nem_Buzz, $8880		; buzz bomber enemy
 		plcm	Nem_Yadrin, $8F60	; yadrin enemy
@@ -193,7 +187,6 @@ PLC_SYZ2:	dc.w ((PLC_SYZ2end-PLC_SYZ2-2)/6)-1
 		plcm	Nem_Bumper, $7000	; bumper
 		plcm	Nem_SyzSpike1, $72C0	; large	spikeball
 		plcm	Nem_SyzSpike2, $7740	; small	spikeball
-		plcm	Nem_Cater, $9FE0	; caterkiller enemy
 		plcm	Nem_LzSwitch, $A1E0	; switch
 		plcm	Nem_Spikes, $A360	; spikes
 		plcm	Nem_HSpring, $A460	; horizontal spring
@@ -203,7 +196,6 @@ PLC_SYZ2:	dc.w ((PLC_SYZ2end-PLC_SYZ2-2)/6)-1
 ; Pattern load cues - Scrap Brain
 ; ---------------------------------------------------------------------------
 PLC_SBZ:	dc.w ((PLC_SBZ2-PLC_SBZ-2)/6)-1
-		plcm	Nem_SBZ,0		; SBZ main patterns
 		plcm	Nem_Stomper, $5800	; moving platform and stomper
 		plcm	Nem_SbzDoor1, $5D00	; door
 		plcm	Nem_Girder, $5E00	; girder
@@ -226,7 +218,7 @@ PLC_SBZ2:	dc.w ((PLC_SBZ2end-PLC_SBZ2-2)/6)-1
 		plcm	Nem_TrapDoor, $9240	; trapdoor
 		plcm	Nem_SbzFloor, $7F20	; collapsing floor
 		plcm	Nem_SpinPform, $9BE0	; small	spinning platform
-		plcm	Nem_LzSwitch, $A1E0	; switch
+		plcm	Nem_Harpoon, $7980	; harpoon
 		plcm	Nem_Spikes, $A360	; spikes
 		plcm	Nem_HSpring, $A460	; horizontal spring
 		plcm	Nem_VSpring, $A660	; vertical spring
@@ -344,8 +336,6 @@ PLC_SSResult:dc.w ((PLC_SpeStResultend-PLC_SSResult-2)/6)-1
 ; Pattern load cues - ending sequence
 ; ---------------------------------------------------------------------------
 PLC_Ending:	dc.w ((PLC_Endingend-PLC_Ending-2)/6)-1
-		plcm	Nem_GHZ_1st,0		; GHZ main patterns
-		plcm	Nem_GHZ_2nd, $39A0	; GHZ secondary	patterns
 		plcm	Nem_Stalk, $6B00	; flower stalk
 		plcm	Nem_EndFlower, $7400	; flowers
 		plcm	Nem_EndEm, $78A0	; emeralds
