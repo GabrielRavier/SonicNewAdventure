@@ -664,8 +664,12 @@ VBla_0A:
 		startZ80
 		bsr.w	PalCycle_SS
 		jsr	(ProcessDMAQueue).l
+		cmpi.b	#96,(v_hbla_line).w
+		bcc.s	.update
+		bra.w	.end
 
-	.nochg:
+	.update:
+		jsr	SS_LoadWalls
 		tst.w	(v_demolength).w
 		beq.w	.end
 		subq.w	#1,(v_demolength).w
@@ -728,8 +732,12 @@ VBla_16:
 		writeVRAM	v_hscrolltablebuffer,$380,vram_hscroll
 		startZ80
 		jsr	(ProcessDMAQueue).l
+		cmpi.b	#96,(v_hbla_line).w
+		bcc.s	.update
+		bra.w	.end
 
-	.nochg:
+	.update:
+		jsr	SS_LoadWalls
 		tst.w	(v_demolength).w
 		beq.w	.end
 		subq.w	#1,(v_demolength).w
@@ -2308,6 +2316,7 @@ GM_LevSel:
 		
 		moveq	#palid_LevelSel,d0
 		bsr.w	PalLoad1	; load level select palette
+		bsr.w	PalLoad3_Water	; load level select palette, fixes screen being black when quitting from LZ/SBZ3
 		
 		lea	(v_hscrolltablebuffer).w,a1
 		moveq	#0,d0
@@ -3395,6 +3404,7 @@ GM_Special:
 		jsr	(SS_Load).l		; load SS layout data
 		move.l	#0,(v_screenposx).w
 		move.l	#0,(v_screenposy).w
+		move.b	#$FF,(v_ssangleprev).w	; fill previous angle with obviously false value to force an update
 		move.b	#id_SonicSpecial,(v_player).w ; load special stage Sonic object
 		bsr.w	PalCycle_SS
 		clr.w	(v_ssangle).w	; set stage angle to "upright"
@@ -6968,6 +6978,8 @@ Map_Bub:	include	"_maps/Bubbles.asm"
 		include	"_anim/Waterfalls.asm"
 Map_WFall:	include	"_maps/Waterfalls.asm"
 
+		include "_incObj/05 Spindash Dust.asm"
+
 ; ===========================================================================
 ; ---------------------------------------------------------------------------
 ; Object 01 - Sonic
@@ -7007,6 +7019,7 @@ Sonic_Main:	; Routine 0
 		move.w	#$600,(v_sonspeedmax).w ; Sonic's top speed
 		move.w	#$C,(v_sonspeedacc).w ; Sonic's acceleration
 		move.w	#$80,(v_sonspeeddec).w ; Sonic's deceleration
+		move.b	#id_SpindashDust,(v_objspace+$1C0).w	; load Spindash dust object
 
 Sonic_Control:	; Routine 2
 		tst.w	(f_debugmode).w	; is debug cheat enabled?
@@ -7076,6 +7089,8 @@ MusicList2:	dc.b bgm_GHZ, bgm_LZ, bgm_MZ, bgm_SLZ, bgm_SYZ, bgm_SBZ
 ; ---------------------------------------------------------------------------
 
 Sonic_MdNormal:
+		bsr.w	Sonic_CheckSpindash
+		bsr.w	Sonic_Peelout
 		bsr.w	Sonic_Jump
 		bsr.w	Sonic_SlopeResist
 		bsr.w	Sonic_Move
@@ -7088,6 +7103,8 @@ Sonic_MdNormal:
 ; ===========================================================================
 
 Sonic_MdJump:
+		bclr	#staSpindash,obStatus2(a0)
+		bclr	#staPeelout,obStatus2(a0)
 		bsr.w	Sonic_JumpHeight
 		bsr.w	Sonic_JumpDirection
 		bsr.w	Sonic_LevelBound
@@ -7114,6 +7131,8 @@ Sonic_MdRoll:
 ; ===========================================================================
 
 Sonic_MdJump2:
+		bclr	#staSpindash,obStatus2(a0)
+		bclr	#staPeelout,obStatus2(a0)
 		bsr.w	Sonic_JumpHeight
 		bsr.w	Sonic_JumpDirection
 		bsr.w	Sonic_LevelBound
@@ -7154,6 +7173,8 @@ locret_13302:
 		include	"_incObj/Sonic Roll.asm"
 		include	"_incObj/Sonic Jump.asm"
 		include	"_incObj/Sonic JumpHeight.asm"
+		include "_incObj/Sonic Spindash.asm"
+		include "_incObj/Sonic Peelout.asm"
 		include	"_incObj/Sonic SlopeResist.asm"
 		include	"_incObj/Sonic RollRepel.asm"
 		include	"_incObj/Sonic SlopeRepel.asm"
@@ -8038,18 +8059,6 @@ loc_1B288:
 
 
 SS_AniWallsRings:
-		lea	($FF400C).l,a1
-		moveq	#0,d0
-		move.b	(v_ssangle).w,d0
-		lsr.b	#2,d0
-		andi.w	#$F,d0
-		moveq	#$23,d1
-
-loc_1B2A4:
-		move.w	d0,(a1)
-		addq.w	#8,a1
-		dbf	d1,loc_1B2A4
-
 		lea	($FF4005).l,a1
 		subq.b	#1,(v_ani1_time).w
 		bpl.s	loc_1B2C8
@@ -8144,6 +8153,38 @@ loc_1B350:
 		adda.w	#$48,a1
 		rts	
 ; End of function SS_AniWallsRings
+
+; ---------------------------------------------------------------------------
+; Subroutine to	animate	walls in the special stage
+; ---------------------------------------------------------------------------
+
+; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
+
+SS_LoadWalls:
+		moveq	#0,d0
+		move.b	(v_ssangle).w,d0	; get the Special Stage angle
+		lsr.b	#2,d0			; modify so it can be used as a frame ID
+		andi.w	#$F,d0
+		cmp.b	(v_ssangleprev).w,d0	; does the modified angle match the recorded value?
+		beq.s	.return			; if so, branch
+
+		lea	($C00000).l,a6
+		lea	(Art_SSWalls).l,a1	; load wall art
+		move.w	d0,d1
+		lsl.w	#8,d1
+		add.w	d1,d1
+		add.w	d1,a1
+
+		locVRAM	$2840			; VRAM address
+
+		move.w	#$F,d1			; number of 8x8 tiles
+		jsr	LoadTiles
+		move.b	d0,(v_ssangleprev).w	; record the modified angle for comparison
+
+	.return:
+		rts
+
+; End of function SS_LoadWalls
 
 ; ===========================================================================
 SS_WaRiVramSet:	dc.w $142, $6142, $142,	$142, $142, $142, $142,	$6142
@@ -8635,6 +8676,8 @@ SonicDynPLC:	include	"_maps/Sonic - Dynamic Gfx Script.asm"
 ; ---------------------------------------------------------------------------
 Art_Sonic:	binclude	"artunc/Sonic.bin"	; Sonic
 		even
+Art_Dust:	binclude	"artunc/Spindash Dust.bin"	; Spindash Dust
+		even
 ; ---------------------------------------------------------------------------
 ; Compressed graphics - various
 ; ---------------------------------------------------------------------------
@@ -8666,7 +8709,7 @@ Map_SSWalls:	include	"_maps/SS Walls.asm"
 ; ---------------------------------------------------------------------------
 ; Compressed graphics - special stage
 ; ---------------------------------------------------------------------------
-Nem_SSWalls:	binclude	"artnem/Special Walls.bin" ; special stage walls
+Art_SSWalls:	binclude	"artunc/Special Walls.bin" ; special stage walls
 		even
 Eni_SSBg1:	binclude	"tilemaps/SS Background 1.bin" ; special stage background (mappings)
 		even

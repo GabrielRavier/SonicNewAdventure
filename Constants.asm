@@ -114,6 +114,12 @@ obAngle:	equ $26	; angle
 obSubtype:	equ $28	; object subtype
 obSolid:	equ ob2ndRout ; solid status flag
 
+; Sonic variables
+obStatus2:	equ $39	; move status
+staSpindash:	equ 0
+staPeelout:	equ 1
+obRevSpeed:	equ $3A ; rev speed for Spindash/Peelout
+
 ; Object variables (Sonic 2 disassembly nomenclature)
 render_flags:	equ 1	; bitfield for x/y flip, display mode
 art_tile:	equ 2	; palette line & VRAM setting (2 bytes)
@@ -237,3 +243,25 @@ fr_Float6:	equ $54
 fr_Injury:	equ $55
 fr_GetAir:	equ $56
 fr_WaterSlide:	equ $57
+fr_Spindash1:	equ $58
+fr_Spindash2:	equ $59
+fr_Spindash3:	equ $5A
+fr_Spindash4:	equ $5B
+fr_Spindash5:	equ $5C
+fr_Spindash6:	equ $5D
+fr_Dash11:	equ $5E
+fr_Dash12:	equ $5F
+fr_Dash13:	equ $60
+fr_Dash14:	equ $61
+fr_Dash21:	equ $62
+fr_Dash22:	equ $63
+fr_Dash23:	equ $64
+fr_Dash24:	equ $65
+fr_Dash31:	equ $66
+fr_Dash32:	equ $67
+fr_Dash33:	equ $68
+fr_Dash34:	equ $69
+fr_Dash41:	equ $6A
+fr_Dash42:	equ $6B
+fr_Dash43:	equ $6C
+fr_Dash44:	equ $6D

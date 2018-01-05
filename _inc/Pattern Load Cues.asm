@@ -49,7 +49,7 @@ plcm:	macro gfx,vram
 ; Pattern load cues - standard block 1
 ; ---------------------------------------------------------------------------
 PLC_Main:	dc.w ((PLC_Mainend-PLC_Main-2)/6)-1
-		plcm	Nem_Lamp, $F400		; lamppost
+		plcm	Nem_Lamp, $D800		; lamppost
 		plcm	Nem_Hud, $D940		; HUD
 		plcm	Nem_Lives, $FA80	; lives	counter
 		plcm	Nem_Ring, $F640 	; rings
@@ -126,7 +126,7 @@ PLC_LZ2:	dc.w ((PLC_LZ2end-PLC_LZ2-2)/6)-1
 		plcm	Nem_LzPlatfm, $89E0	; rising platform
 		plcm	Nem_Orbinaut, $8CE0	; orbinaut enemy
 		plcm	Nem_Jaws, $90C0		; jaws enemy
-		plcm	Nem_LzSwitch, $A1E0	; switch
+		plcm	Nem_Harpoon, $7980	; harpoon
 		plcm	Nem_Cork, $A000		; cork block
 		plcm	Nem_Spikes, $A360	; spikes
 		plcm	Nem_HSpring, $A460	; horizontal spring
@@ -218,7 +218,7 @@ PLC_SBZ2:	dc.w ((PLC_SBZ2end-PLC_SBZ2-2)/6)-1
 		plcm	Nem_TrapDoor, $9240	; trapdoor
 		plcm	Nem_SbzFloor, $7F20	; collapsing floor
 		plcm	Nem_SpinPform, $9BE0	; small	spinning platform
-		plcm	Nem_Harpoon, $7980	; harpoon
+		plcm	Nem_LzSwitch, $A1E0	; switch
 		plcm	Nem_Spikes, $A360	; spikes
 		plcm	Nem_HSpring, $A460	; horizontal spring
 		plcm	Nem_VSpring, $A660	; vertical spring
@@ -264,7 +264,6 @@ PLC_Warp:
 PLC_SpecialStage:	dc.w ((PLC_SpeStageend-PLC_SpecialStage-2)/6)-1
 		plcm	Nem_SSBgCloud, 0	; bubble and cloud background
 		plcm	Nem_SSBgFish, $A20	; bird and fish	background
-		plcm	Nem_SSWalls, $2840	; walls
 		plcm	Nem_Bumper, $4760	; bumper
 		plcm	Nem_SSGOAL, $4A20	; GOAL block
 		plcm	Nem_SSUpDown, $4C60	; UP and DOWN blocks

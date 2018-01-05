@@ -133,6 +133,7 @@ Spring_BounceLR:
 loc_DC56:
 		bclr	#5,obStatus(a0)
 		bclr	#5,obStatus(a1)
+		clr.b	(v_cameralag).w	; clear screen delay counter
 		sfx	sfx_Spring,0,0,0	; play spring sound
 
 Spring_AniLR:	; Routine $A

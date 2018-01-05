@@ -25,10 +25,6 @@ loc_1380C:
 
 
 Sonic_HurtStop:
-		move.w	(v_limitbtm2).w,d0
-		addi.w	#$E0,d0
-		cmp.w	obY(a0),d0
-		bcs.w	KillSonic
 		bsr.w	Sonic_Floor
 		btst	#1,obStatus(a0)
 		bne.s	locret_13860
@@ -49,6 +45,7 @@ locret_13860:
 ; ---------------------------------------------------------------------------
 
 Sonic_Death:	; Routine 6
+		clr.b	(v_cameralag).w
 		bsr.w	GameOver
 		jsr	(ObjectFall).l
 		bsr.w	Sonic_RecordPosition
@@ -70,7 +67,7 @@ GameOver:
 		addq.b	#1,(f_lifecount).w ; update lives counter
 		subq.b	#1,(v_lives).w	; subtract 1 from number of lives
 		bne.s	loc_138D4
-		move.w	#0,$3A(a0)
+		move.b	#0,$3A(a0)
 		move.b	#id_GameOverCard,(v_objspace+$80).w ; load GAME object
 		move.b	#id_GameOverCard,(v_objspace+$C0).w ; load OVER object
 		move.b	#1,(v_objspace+$C0+obFrame).w ; set OVER object to correct frame
@@ -83,10 +80,10 @@ loc_138C2:
 ; ===========================================================================
 
 loc_138D4:
-		move.w	#60,$3A(a0)	; set time delay to 1 second
+		move.b	#60,$3A(a0)	; set time delay to 1 second
 		tst.b	(f_timeover).w	; is TIME OVER tag set?
 		beq.s	locret_13900	; if not, branch
-		move.w	#0,$3A(a0)
+		move.b	#0,$3A(a0)
 		move.b	#id_GameOverCard,(v_objspace+$80).w ; load TIME object
 		move.b	#id_GameOverCard,(v_objspace+$C0).w ; load OVER object
 		move.b	#2,(v_objspace+$80+obFrame).w
@@ -103,9 +100,9 @@ locret_13900:
 ; ---------------------------------------------------------------------------
 
 Sonic_ResetLevel:; Routine 8
-		tst.w	$3A(a0)
+		tst.b	$3A(a0)
 		beq.s	locret_13914
-		subq.w	#1,$3A(a0)	; subtract 1 from time delay
+		subq.b	#1,$3A(a0)	; subtract 1 from time delay
 		bne.s	locret_13914
 		move.w	#1,(f_restart).w ; restart the level
 

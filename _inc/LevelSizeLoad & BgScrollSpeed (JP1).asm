@@ -64,7 +64,8 @@ LevSz_StartLoc:
 		move.w	(v_zone).w,d0
 		lsl.b	#6,d0
 		lsr.w	#4,d0
-		lea	StartLocArray(pc,d0.w),a1 ; MJ: load Sonic's start location address
+		lea	(StartLocArray).l,a1
+		lea	(a1,d0.w),a1 ; MJ: load Sonic's start location address
 		tst.w	(f_demo).w	; is ending demo mode on?
 		bpl.s	LevSz_SonicPos	; if not, branch
 
@@ -91,6 +92,13 @@ LevSz_SonicPos:
 
 SetScreen:
 	LevSz_SkipStartPos:
+		clr.w	(v_trackpos).w	; reset Sonic's position tracking index 
+		lea	(v_tracksonic).w,a2	; load the tracking array into a2 
+		moveq	#63,d2	; begin a 64-step loop 
+.loop: 
+		move.w	d1,(a2)+	; fill in X 
+		move.w	d0,(a2)+	; fill in Y 
+		dbf	d2,.loop	; loop
 		subi.w	#160,d1		; is Sonic more than 160px from left edge?
 		bcc.s	SetScr_WithinLeft ; if yes, branch
 		moveq	#0,d1

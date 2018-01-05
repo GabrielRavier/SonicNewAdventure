@@ -106,6 +106,7 @@ v_opl_data	=	ramaddr ( $FFFFF770 )	; ObjPosLoad - data buffer ($10 bytes)
 
 v_ssangle	=	ramaddr ( $FFFFF780 )	; Special Stage angle (2 bytes)
 v_ssrotate	=	ramaddr ( $FFFFF782 )	; Special Stage rotation speed (2 bytes)
+v_ssangleprev	=	ramaddr ( $FFFFF784 )	; Special Stage previous angle
 v_btnpushtime1	=	ramaddr ( $FFFFF790 )	; button push duration - in level (2 bytes)
 v_btnpushtime2	=	ramaddr ( $FFFFF792 )	; button push duration - in demo (2 bytes)
 v_palchgspeed	=	ramaddr ( $FFFFF794 )	; palette fade/transition speed (0 is fastest) (2 bytes)
@@ -207,6 +208,9 @@ v_lamp_lives:	= v_lastlamp+$24 ; lives counter at lamppost
 v_emeralds	=	ramaddr ( $FFFFFE57 )	; number of chaos emeralds
 v_emldlist	=	ramaddr ( $FFFFFE58 )	; which individual emeralds you have (00 = no; 01 = yes) (6 bytes)
 v_oscillate	=	ramaddr ( $FFFFFE5E )	; values which oscillate - for swinging platforms, et al ($42 bytes)
+v_cameralag	=	ramaddr ( $FFFFFEB3 )	; camera lag after launching Spin Dash (1 byte)
+v_scrolldelay	=	ramaddr ( $FFFFFEBE )	; scroll delay timer
+v_centstep	=	ramaddr ( $FFFFFEBF )	; value used to increment centiseconds
 v_ani0_time	=	ramaddr ( $FFFFFEC0 )	; synchronised sprite animation 0 - time until next frame (used for synchronised animations)
 v_ani0_frame	=	ramaddr ( $FFFFFEC1 )	; synchronised sprite animation 0 - current frame
 v_ani1_time	=	ramaddr ( $FFFFFEC2 )	; synchronised sprite animation 1 - time until next frame

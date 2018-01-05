@@ -91,6 +91,28 @@ ptr_MS_Float6:	dc.w MS_Float6-Map_Sonic_internal
 ptr_MS_Injury:	dc.w MS_Injury-Map_Sonic_internal
 ptr_MS_GetAir:	dc.w MS_GetAir-Map_Sonic_internal
 ptr_MS_WaterSlide:dc.w MS_WaterSlide-Map_Sonic_internal
+ptr_MS_Spindash1: dc.w MS_Spindash1-Map_Sonic_internal
+ptr_MS_Spindash2: dc.w MS_Spindash2-Map_Sonic_internal
+ptr_MS_Spindash3: dc.w MS_Spindash3-Map_Sonic_internal
+ptr_MS_Spindash4: dc.w MS_Spindash4-Map_Sonic_internal
+ptr_MS_Spindash5: dc.w MS_Spindash5-Map_Sonic_internal
+ptr_MS_Spindash6: dc.w MS_Spindash6-Map_Sonic_internal
+ptr_MS_Dash11:	dc.w MS_Dash11-Map_Sonic_internal
+ptr_MS_Dash12:	dc.w MS_Dash12-Map_Sonic_internal
+ptr_MS_Dash13:	dc.w MS_Dash13-Map_Sonic_internal
+ptr_MS_Dash14:	dc.w MS_Dash14-Map_Sonic_internal
+ptr_MS_Dash21:	dc.w MS_Dash21-Map_Sonic_internal
+ptr_MS_Dash22:	dc.w MS_Dash22-Map_Sonic_internal
+ptr_MS_Dash23:	dc.w MS_Dash23-Map_Sonic_internal
+ptr_MS_Dash24:	dc.w MS_Dash24-Map_Sonic_internal
+ptr_MS_Dash31:	dc.w MS_Dash31-Map_Sonic_internal
+ptr_MS_Dash32:	dc.w MS_Dash32-Map_Sonic_internal
+ptr_MS_Dash33:	dc.w MS_Dash33-Map_Sonic_internal
+ptr_MS_Dash34:	dc.w MS_Dash34-Map_Sonic_internal
+ptr_MS_Dash41:	dc.w MS_Dash41-Map_Sonic_internal
+ptr_MS_Dash42:	dc.w MS_Dash42-Map_Sonic_internal
+ptr_MS_Dash43:	dc.w MS_Dash43-Map_Sonic_internal
+ptr_MS_Dash44:	dc.w MS_Dash44-Map_Sonic_internal
 
 MS_Null:	dc.b 0
 MS_Stand:	dc.b 4			; standing
@@ -440,4 +462,79 @@ MS_GetAir:	dc.b 3			; collecting bubble (LZ)
 MS_WaterSlide:	dc.b 2			; water	slide (LZ)
 		dc.b $F0, $F, 0, 0, $EC
 		dc.b $F8, 2, 0,	$10, $C
+MS_Spindash1:	dc.b 1	
+		dc.b $F8, $F, 0, 0, $F4	
+MS_Spindash2:	dc.b 1	
+		dc.b $F8, $F, 0, 0, $F4	
+MS_Spindash3:	dc.b 1	
+		dc.b $F8, $F, 0, 0, $F4	
+MS_Spindash4:	dc.b 1	
+		dc.b $F8, $F, 0, 0, $F4	
+MS_Spindash5:	dc.b 1	
+		dc.b $F8, $F, 0, 0, $F4	
+MS_Spindash6:	dc.b 1	
+		dc.b $F8, $F, 0, 0, $F4	
+MS_Dash11:	dc.b 2	
+		dc.b $F4, $F, 0, 0, $EC	
+		dc.b $F4, 3, 0, $10, $C	
+MS_Dash12:	dc.b 2	
+		dc.b $FC, 2, 0, 0, $EC	
+		dc.b $F4, $F, 0, 3, $F4	
+MS_Dash13:	dc.b 2	
+		dc.b $FC, 2, 0, 0, $EC	
+		dc.b $F4, $F, 0, 3, $F4	
+MS_Dash14:	dc.b 2	
+		dc.b $FC, 1, 0, 0, $EC	
+		dc.b $F4, $F, 0, 2, $F4	
+MS_Dash21:	dc.b 5	
+		dc.b $F0, 8, 0, 0, $FC	
+		dc.b $F8, $E, 0, 3, $F4	
+		dc.b $F8, 2, 0, $F, $14	
+		dc.b $10, 5, 0, $12, $F4	
+		dc.b $10, 0, 0, $16, 4	
+MS_Dash22:	dc.b 3	
+		dc.b $F0, 8, 0, 0, $FC	
+		dc.b $F8, $F, 0, 3, $F4	
+		dc.b 0, 1, 0, $13, $14	
+MS_Dash23:	dc.b 5	
+		dc.b $F0, 8, 0, 0, $FB	
+		dc.b $F8, $E, 0, 3, $FB	
+		dc.b 0, 2, 0, $F, $F3	
+		dc.b $10, 5, 0, $12, $FB	
+		dc.b $10, 0, 0, $16, $B	
+MS_Dash24:	dc.b 3	
+		dc.b $F0, 8, 0, 0, $FC	
+		dc.b $F8, $F, 0, 3, $F4	
+		dc.b 0, 1, 0, $13, $14	
+MS_Dash31:	dc.b 2	
+		dc.b $F0, $F, 0, 0, $F4	
+		dc.b $10, 8, 0, $10, $FC	
+MS_Dash32:	dc.b 2	
+		dc.b $F0, $F, 0, 0, $F4	
+		dc.b $10, 8, 0, $10, $FC	
+MS_Dash33:	dc.b 2	
+		dc.b $F0, $F, 0, 0, $F4	
+		dc.b $10, 8, 0, $10, $FC	
+MS_Dash34:	dc.b 2	
+		dc.b $F0, $F, 0, 0, $F4	
+		dc.b $10, 4, 0, $10, $FC	
+MS_Dash41:	dc.b 4	
+		dc.b $E8, 9, 0, 0, $F4	
+		dc.b $F0, 2, 0, 6, $EC	
+		dc.b $F8, $E, 0, 9, $F4	
+		dc.b 0, 1, 0, $15, $14	
+MS_Dash42:	dc.b 3	
+		dc.b $E8, 4, 0, 0, $FC	
+		dc.b $F0, 2, 0, 2, $EC	
+		dc.b $F0, $F, 0, 5, $F4	
+MS_Dash43:	dc.b 5	
+		dc.b $E8, 8, 0, 0, $F4	
+		dc.b $F0, $E, 0, 3, $EC	
+		dc.b $F0, 2, 0, $F, $C	
+		dc.b $F8, 1, 0, $12, $14	
+		dc.b 8, 8, 0, $14, $FC	
+MS_Dash44:	dc.b 3	
+		dc.b $E8, 4, 0, 0, $FC	
+		dc.b $F0, 2, 0, 2, $EC	
+		dc.b $F0, $F, 0, 5, $F4	
 		even

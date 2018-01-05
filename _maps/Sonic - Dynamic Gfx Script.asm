@@ -90,6 +90,28 @@ SonicDynPLC_internal:
 		dc.w SonPLC_Injury-SonicDynPLC_internal
 		dc.w SonPLC_GetAir-SonicDynPLC_internal
 		dc.w SonPLC_WaterSlide-SonicDynPLC_internal
+		dc.w SonPLC_Spindash1-SonicDynPLC_internal
+		dc.w SonPLC_Spindash2-SonicDynPLC_internal
+		dc.w SonPLC_Spindash3-SonicDynPLC_internal
+		dc.w SonPLC_Spindash4-SonicDynPLC_internal
+		dc.w SonPLC_Spindash5-SonicDynPLC_internal
+		dc.w SonPLC_Spindash6-SonicDynPLC_internal
+		dc.w SonPLC_Dash11-SonicDynPLC_internal
+		dc.w SonPLC_Dash12-SonicDynPLC_internal
+		dc.w SonPLC_Dash13-SonicDynPLC_internal
+		dc.w SonPLC_Dash14-SonicDynPLC_internal
+		dc.w SonPLC_Dash21-SonicDynPLC_internal
+		dc.w SonPLC_Dash22-SonicDynPLC_internal
+		dc.w SonPLC_Dash23-SonicDynPLC_internal
+		dc.w SonPLC_Dash24-SonicDynPLC_internal
+		dc.w SonPLC_Dash31-SonicDynPLC_internal
+		dc.w SonPLC_Dash32-SonicDynPLC_internal
+		dc.w SonPLC_Dash33-SonicDynPLC_internal
+		dc.w SonPLC_Dash34-SonicDynPLC_internal
+		dc.w SonPLC_Dash41-SonicDynPLC_internal
+		dc.w SonPLC_Dash42-SonicDynPLC_internal
+		dc.w SonPLC_Dash43-SonicDynPLC_internal
+		dc.w SonPLC_Dash44-SonicDynPLC_internal
 SonPLC_Null:	dc.b 0
 SonPLC_Stand:	dc.b 4,	$20, 0,	$70, 3,	$20, $B, $20, $E
 SonPLC_Wait1:	dc.b 3,	$50, $11, $50, $17, $20, $1D
@@ -176,4 +198,26 @@ SonPLC_Shrink5:	dc.b 1,	$14, $D0
 SonPLC_Injury:	dc.b 3,	$B4, $D2, $14, $DE, $34, $E0
 SonPLC_GetAir:	dc.b 3,	$54, $E4, $B4, $EA, $10, $6D
 SonPLC_WaterSlide:dc.b 2, $F4, $F6, $25, 6
+SonPLC_Spindash1: dc.b 1, $F5, 9	
+SonPLC_Spindash2: dc.b 1, $F5, $19	
+SonPLC_Spindash3: dc.b 1, $F5, $29	
+SonPLC_Spindash4: dc.b 1, $F5, $39	
+SonPLC_Spindash5: dc.b 1, $F5, $49	
+SonPLC_Spindash6: dc.b 1, $F5, $59	
+SonPLC_Dash11:	dc.b 2, $F5, $68, $35, $78	
+SonPLC_Dash12:	dc.b 2, $25, $7C, $F5, $7F	
+SonPLC_Dash13:	dc.b 2, $25, $8F, $F5, $92	
+SonPLC_Dash14:	dc.b 2, $15, $A2, $F5, $A4	
+SonPLC_Dash21:	dc.b 5, $25, $B4, $B5, $B7, $25, $C3, $35, $C6, 5, $CA	
+SonPLC_Dash22:	dc.b 3, $25, $CB, $F5, $CE, $15, $DE	
+SonPLC_Dash23:	dc.b 5, $25, $E0, $B5, $E3, $25, $EF, $35, $F2, 5, $F6	
+SonPLC_Dash24:	dc.b 3, $25, $F7, $F5, $FA, $16, $A	
+SonPLC_Dash31:	dc.b 2, $F6, $C, $26, $1C	
+SonPLC_Dash32:	dc.b 2, $F6, $1F, $26, $2F	
+SonPLC_Dash33:	dc.b 2, $F6, $32, $26, $42	
+SonPLC_Dash34:	dc.b 2, $F6, $45, $16, $55	
+SonPLC_Dash41:	dc.b 4, $56, $57, $26, $5D, $B6, $60, $16, $6C	
+SonPLC_Dash42:	dc.b 3, $16, $6E, $26, $70, $F6, $73	
+SonPLC_Dash43:	dc.b 5, $26, $83, $B6, $86, $26, $92, $16, $95, $26, $97	
+SonPLC_Dash44:	dc.b 3, $16, $9A, $26, $9C, $F6, $9F	
 		even
