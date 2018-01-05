@@ -9,7 +9,7 @@
 	
 	cpu 68000
 
-zeroOffsetOptimization = 0
+zeroOffsetOptimization = 1
 ;	| If 1, makes a handful of zero-offset instructions smaller
 	
 	include "MacroSetup.asm"
