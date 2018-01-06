@@ -132,7 +132,6 @@ dbug:	macro map,object,subtype,frame,vram
 	dbug	Map_Plat_SYZ,	id_BasicPlatform, 0,	0,	$4000
 	dbug	Map_FBlock,	id_FloatingBlock, 0,	0,	$4000
 	dbug	Map_But,	id_Button,	0,	0,	$513
-	dbug	Map_Cat,	id_Caterkiller,	0,	0,	$24FF
 	dbug	Map_Lamp,	id_Lamppost,	1,	0,	$6C0
 .SYZend:
 
