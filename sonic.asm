@@ -1995,19 +1995,9 @@ GM_Title:
 		move.l	d0,(a1)+
 		dbf	d1,Tit_ClrObj1	; fill object space ($D000-$EFFF) with 0
 
-		locVRAM	0
-		lea	(Nem_JapNames).l,a0 ; load Japanese credits
-		bsr.w	NemDec
 		locVRAM	$14C0
 		lea	(Nem_CreditText).l,a0 ;	load alphabet
 		bsr.w	NemDec
-		lea	($FF0000).l,a1
-		lea	(Eni_JapNames).l,a0 ; load mappings for	Japanese credits
-		move.w	#0,d0
-		bsr.w	EniDec
-
-		copyTilemap	$FF0000,$C000,$27,$1B
-
 		lea	(v_pal_dry_dup).w,a1
 		moveq	#cBlack,d0
 		move.w	#$1F,d1
@@ -8586,10 +8576,6 @@ Nem_TitleFg:	binclude	"artnem/Title Screen Foreground.bin"
 Nem_TitleSonic:	binclude	"artnem/Title Screen Sonic.bin"
 		even
 Nem_TitleTM:	binclude	"artnem/Title Screen TM.bin"
-		even
-Eni_JapNames:	binclude	"tilemaps/Hidden Japanese Credits.bin" ; Japanese credits (mappings)
-		even
-Nem_JapNames:	binclude	"artnem/Hidden Japanese Credits.bin"
 		even
 Nem_LevSelFont:	binclude	"artnem/Level Select Font.bin"
 		even
