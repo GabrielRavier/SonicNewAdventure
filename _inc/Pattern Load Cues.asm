@@ -244,8 +244,8 @@ PLC_Boss:	dc.w ((PLC_Bossend-PLC_Boss-2)/6)-1
 ; Pattern load cues - act 1/2 signpost
 ; ---------------------------------------------------------------------------
 PLC_Signpost:	dc.w ((PLC_Signpostend-PLC_Signpost-2)/6)-1
-		plcm	Nem_SignPost, $D000	; signpost
-		plcm	Nem_Bonus, $96C0	; hidden bonus points
+		plcm	Nem_SignPost, $96C0	; signpost
+		plcm	Nem_Bonus, $9EC0	; hidden bonus points
 		plcm	Nem_BigFlash, $8C40	; giant	ring flash effect
 	PLC_Signpostend:
 ; ---------------------------------------------------------------------------
