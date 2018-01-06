@@ -20,11 +20,12 @@ REM // run the assembler
 REM // -xx shows the most detailed error output
 REM // -E outputs error messages to file
 REM // -A gives us a small speedup
+REM // -L generates a listing file
 set AS_MSGPATH=AS/Win32
 set USEANSI=n
 
 REM // allow the user to choose to output error messages to file by supplying the -logerrors parameter
-IF "%1"=="-logerrors" ( "AS/Win32/asw.exe" -xx -A sonic.asm ) ELSE "AS/Win32/asw.exe" -xx -E -A sonic.asm
+IF "%1"=="-logerrors" ( "AS/Win32/asw.exe" -xx -A -L sonic.asm ) ELSE "AS/Win32/asw.exe" -xx -E -A -L sonic.asm
 
 REM // if there were errors, a log file is produced
 IF EXIST sonic.log goto LABLERROR3

@@ -2742,12 +2742,6 @@ SSMenuText:
 	
 	charset
 	
-; ---------------------------------------------------------------------------
-; Music	playlist
-; ---------------------------------------------------------------------------
-MusicList:	dc.b bgm_GHZ, bgm_LZ, bgm_MZ, bgm_SLZ, bgm_SYZ, bgm_SBZ, bgm_FZ
-		zonewarning MusicList,1
-		even
 ; ===========================================================================
 
 ; ---------------------------------------------------------------------------
@@ -2889,6 +2883,7 @@ Level_GetBgm:
 		adda.l	#$C,a2
 		move.w	(a2),d0
 		bsr.w	PlaySound	; play music
+		move.w	d0,(v_lvlmusic).w	; save the music
 		move.b	#id_TitleCard,(v_objspace+$80).w ; load title card object
 
 Level_TtlCardLoop:
@@ -3234,6 +3229,7 @@ SignpostArtLoad:
 		cmp.w	(v_limitleft2).w,d1
 		beq.s	.exit
 		move.w	d1,(v_limitleft2).w ; move left boundary to current screen position
+		move.w	#$C40,(v_gfxbigring).w	; set big ring gfx to load
 		moveq	#plcid_Signpost,d0
 		bra.w	NewPLC		; load signpost	patterns
 
@@ -6991,12 +6987,6 @@ Sonic_Modes:	dc.w Sonic_MdNormal-Sonic_Modes
 		dc.w Sonic_MdJump-Sonic_Modes
 		dc.w Sonic_MdRoll-Sonic_Modes
 		dc.w Sonic_MdJump2-Sonic_Modes
-; ---------------------------------------------------------------------------
-; Music	to play	after invincibility wears off
-; ---------------------------------------------------------------------------
-MusicList2:	dc.b bgm_GHZ, bgm_LZ, bgm_MZ, bgm_SLZ, bgm_SYZ, bgm_SBZ
-		zonewarningnoending MusicList2,1
-		even
 
 		include	"_incObj/Sonic Display.asm"
 		include	"_incObj/Sonic RecordPosition.asm"
@@ -7024,6 +7014,8 @@ Sonic_MdNormal:
 Sonic_MdJump:
 		bclr	#staSpindash,obStatus2(a0)
 		bclr	#staPeelout,obStatus2(a0)
+		bsr.w	Sonic_MidairRoll
+		bsr.w	Sonic_AirAnim
 		bsr.w	Sonic_JumpHeight
 		bsr.w	Sonic_JumpDirection
 		bsr.w	Sonic_LevelBound
@@ -7052,6 +7044,7 @@ Sonic_MdRoll:
 Sonic_MdJump2:
 		bclr	#staSpindash,obStatus2(a0)
 		bclr	#staPeelout,obStatus2(a0)
+		bsr.w	Sonic_MidairUnroll
 		bsr.w	Sonic_JumpHeight
 		bsr.w	Sonic_JumpDirection
 		bsr.w	Sonic_LevelBound
@@ -7091,6 +7084,8 @@ locret_13302:
 		include	"_incObj/Sonic LevelBound.asm"
 		include	"_incObj/Sonic Roll.asm"
 		include	"_incObj/Sonic Jump.asm"
+		include "_incObj/Sonic AirAnim.asm"
+		include "_incObj/Sonic MidairRoll.asm"
 		include	"_incObj/Sonic JumpHeight.asm"
 		include "_incObj/Sonic Spindash.asm"
 		include "_incObj/Sonic Peelout.asm"
@@ -8230,6 +8225,7 @@ SS_Ani1Up:
 		bne.s	locret_1B596
 		clr.l	(a0)
 		clr.l	4(a0)
+		move.b	#4,($FFFFD024).w
 
 locret_1B596:
 		rts	
@@ -8385,7 +8381,17 @@ loc_1B6F6:
 		moveq	#$3F,d2
 
 loc_1B6F8:
-		move.b	(a0)+,(a1)+
+		move.b	(a0)+,d0	;load the layout item into d0
+		cmpi.b	#$3B,d0		; is the item an emerald?
+		bcs.s	.notem
+		cmpi.b	#$40,d0
+		bhi.s	.notem
+		cmpi.b	#6,(v_emeralds).w	;do you have all the emeralds?
+		bne.s	.notem		;if not, branch
+		move.b	#$28,d0		;else, make a 1up
+		
+	.notem:
+		move.b	d0,(a1)+	;move the item into memory
 		dbf	d2,loc_1B6F8
 
 		lea	$40(a1),a1

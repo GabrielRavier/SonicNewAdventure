@@ -120,6 +120,8 @@ SonicDynPLC_internal:
 		dc.w SonPLC_BalanceBack2-SonicDynPLC_internal
 		dc.w SonPLC_BalanceBack3-SonicDynPLC_internal
 		dc.w SonPLC_BalanceBack4-SonicDynPLC_internal
+		dc.w SonPLC_Fall1-SonicDynPLC_internal
+		dc.w SonPLC_Fall2-SonicDynPLC_internal
 SonPLC_Null:	dc.b 0
 SonPLC_Stand:	dc.b 4,	$20, 0,	$70, 3,	$20, $B, $20, $E
 SonPLC_Wait1:	dc.b 3,	$50, $11, $50, $17, $20, $1D
@@ -236,4 +238,6 @@ SonPLC_BalanceBack1:	dc.b 3, $B6, $AF, $26, $BB, $56, $BE
 SonPLC_BalanceBack2:	dc.b 4, $B6, $C4, $16, $D0, $36, $D2, 6, $D6	
 SonPLC_BalanceBack3:	dc.b 3, $B6, $D7, $36, $E3, $16, $D0	
 SonPLC_BalanceBack4:	dc.b 4, $B6, $E7, $26, $F3, $26, $F6, $16, $F9	
+SonPLC_Fall1:	dc.b 4, 7, $49, $87, $4A, $17, $53, $57, $55	
+SonPLC_Fall2:	dc.b 4, 7, $5B, $77, $5C, $27, $64, $57, $67	
 		even

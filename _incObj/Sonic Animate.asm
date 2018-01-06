@@ -74,7 +74,7 @@ Sonic_Animate:
 		subq.b	#1,obTimeFrame(a0) ; subtract 1 from frame duration
 		bpl.s	.delay		; if time remains, branch
 		addq.b	#1,d0		; is animation walking/running?
-		bne.w	.rolljump	; if not, branch
+		bne.w	.rolljump	; if not, branchz
 		moveq	#0,d1
 		move.b	obAngle(a0),d0	; get Sonic's angle
 		move.b	obStatus(a0),d2

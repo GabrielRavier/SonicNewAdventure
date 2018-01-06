@@ -50,6 +50,13 @@ Sonic_Death:	; Routine 6
 		clr.b	(v_cameralag).w
 		bsr.w	GameOver
 		jsr	(ObjectFall).l
+		btst	#4,obStatus(a0)
+		bne.s	.goingup
+		tst.w	obVelY(a0)
+		ble.s	.goingup
+		move.b	#id_Drown,obAnim(a0)
+		bset	#4,obStatus(a0)
+	.goingup:
 		bsr.w	Sonic_RecordPosition
 		bsr.w	Sonic_Animate
 		bsr.w	Sonic_LoadGfx
@@ -72,7 +79,6 @@ GameOver:
 		subq.b	#1,(v_lives).w	; subtract 1 from number of lives
 		bne.s	loc_138D4
 	.skip:
-		bne.s	loc_138D4
 		move.b	#0,$3A(a0)
 		move.b	#id_GameOverCard,(v_objspace+$80).w ; load GAME object
 		move.b	#id_GameOverCard,(v_objspace+$C0).w ; load OVER object

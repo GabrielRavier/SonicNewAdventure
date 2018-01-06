@@ -21,8 +21,6 @@ GRing_Main:	; Routine 0
 		move.b	#$40,obActWid(a0)
 		tst.b	obRender(a0)
 		bpl.s	GRing_Animate
-		cmpi.b	#6,(v_emeralds).w ; do you have 6 emeralds?
-		beq.w	GRing_Delete	; if yes, branch
 		cmpi.w	#50,(v_rings).w	; do you have at least 50 rings?
 		bcc.s	GRing_Okay	; if yes, branch
 		rts	
@@ -32,7 +30,6 @@ GRing_Okay:
 		addq.b	#2,obRoutine(a0)
 		move.b	#2,obPriority(a0)
 		move.b	#$52,obColType(a0)
-		move.w	#$C40,(v_gfxbigring).w
 
 GRing_Animate:	; Routine 2
 		move.b	(v_ani1_frame).w,obFrame(a0)

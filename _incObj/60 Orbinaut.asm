@@ -13,7 +13,10 @@ Orb_Index:	dc.w Orb_Main-Orb_Index
 		dc.w Orb_Display-Orb_Index
 		dc.w Orb_MoveOrb-Orb_Index
 		dc.w Orb_ChkDel2-Orb_Index
+		dc.w Orb_Pause-Orb_Index
+		dc.w Orb_MoveOut-Orb_Index
 
+orb_distance: equ $2A		; distance of child orbs
 orb_parent:	equ $3C		; address of parent object
 ; ===========================================================================
 
@@ -27,9 +30,10 @@ Orb_Main:	; Routine 0
 	.isscrap:
 		cmpi.b	#id_LZ,(v_zone).w ; check if level is LZ
 		bne.s	.notlabyrinth
-		move.w	#$467,obGfx(a0)	; LZ specific code
+		move.w	#$2467,obGfx(a0)	; LZ specific code
 
 	.notlabyrinth:
+		move.b	#4,orb_distance(a0)
 		ori.b	#4,obRender(a0)
 		move.b	#4,obPriority(a0)
 		move.b	#$B,obColType(a0)
@@ -53,6 +57,11 @@ Orb_Main:	; Routine 0
 		move.b	#6,obRoutine(a1) ; use Orb_MoveOrb routine
 		move.l	obMap(a0),obMap(a1)
 		move.w	obGfx(a0),obGfx(a1)
+		cmpi.b	#id_SLZ,(v_zone).w ; check if level is SLZ
+		beq.s	.isSLZ
+		sub.w	#$2000,obGfx(a1)
+		
+	.isSLZ:
 		ori.b	#4,obRender(a1)
 		move.b	#4,obPriority(a1)
 		move.b	#8,obActWid(a1)
@@ -65,13 +74,16 @@ Orb_Main:	; Routine 0
 
 	.fail:
 		moveq	#1,d0
+		cmpi.b	#2,obSubtype(a0)
+		bne.s	.add
+		neg.w	d0
+	.add:
 		btst	#0,obStatus(a0)	; is orbinaut facing left?
 		beq.s	.noflip		; if not, branch
 		neg.w	d0
 
 	.noflip:
 		move.b	d0,$36(a0)
-		move.b	obSubtype(a0),obRoutine(a0) ; if type is 02, skip Orb_ChkSonic
 		addq.b	#2,obRoutine(a0)
 		move.w	#-$40,obVelX(a0) ; move orbinaut to the left
 		btst	#0,obStatus(a0)	; is orbinaut facing left??
@@ -89,7 +101,7 @@ Orb_ChkSonic:	; Routine 2
 		neg.w	d0
 
 	.isright:
-		cmpi.w	#$A0,d0		; is Sonic within $A0 pixels of	orbinaut?
+		cmpi.w	#$80,d0		; is Sonic within $A0 pixels of	orbinaut?
 		bcc.s	.animate	; if not, branch
 		move.w	(v_player+obY).w,d0
 		sub.w	obY(a0),d0	; is Sonic above the orbinaut?
@@ -148,7 +160,9 @@ Orb_MoveOrb:	; Routine 6
 		cmpi.b	#id_Orbinaut,0(a1) ; does parent object still exist?
 		bne.w	DeleteObject	; if not, delete
 		cmpi.b	#2,obFrame(a1)	; is orbinaut angry?
-		bne.s	.circle		; if not, branch
+		bne.w	.circle		; if not, branch
+		cmpi.b	#2,obSubtype(a1)
+		beq.s	.fire2
 		cmpi.b	#$40,obAngle(a0) ; is spikeorb directly under the orbinaut?
 		bne.s	.circle		; if not, branch
 		addq.b	#2,obRoutine(a0)
@@ -161,18 +175,44 @@ Orb_MoveOrb:	; Routine 6
 		btst	#0,obStatus(a1)
 		beq.s	.noflip
 		neg.w	obVelX(a0)
+		bra.s	.noflip
+
+	.fire2:
+		cmpi.b	#3,orb_distance(a1)	; is the orb distance high enough?
+		beq.s	.circle			; if so, branch to the code that makes them circle
+		move.b	#12,obRoutine(a0)	; change orb to the routine that moves it outward
+		move.b	#30,$2E(a0)		; set the orb timer to 30 steps
+		subq.b	#1,$37(a1)		; decrease the number of orbs left to be fired off
+		bne.s	.skip			; if there are still orbs, branch
+		move.b	#10,obRoutine(a1)	; change to the routine that pauses movement
+		move.b	#3,orb_distance(a1)	; set orb distance
+		move.b	$36(a1),d0		; double orbit speed
+		asl.b	#1,d0
+		move.b	d0,$36(a1)
+		move.b	#30,$2E(a1)		; set a timer to 30 steps
+	
+	.skip:
+		move.w	obX(a0),d2		; set the velocity of the orb based on its position
+		sub.w	obX(a1),d2		; relative to the Orbinaut
+		asl.w	#3,d2
+		move.w	d2,obVelX(a0)
+		move.w	obY(a0),d2
+		sub.w	obY(a1),d2
+		asl.w	#3,d2
+		move.w	d2,obVelY(a0)
 
 	.noflip:
 		bra.w	DisplaySprite
 ; ===========================================================================
 
 .circle:
+		move.b	orb_distance(a1),d2	; put orb distance into d2
 		move.b	obAngle(a0),d0
 		jsr	(CalcSine).l
-		asr.w	#4,d1
+		asr.w	d2,d1
 		add.w	obX(a1),d1
 		move.w	d1,obX(a0)
-		asr.w	#4,d0
+		asr.w	d2,d0
 		add.w	obY(a1),d0
 		move.w	d0,obY(a0)
 		move.b	$36(a1),d0
@@ -180,8 +220,20 @@ Orb_MoveOrb:	; Routine 6
 		bra.w	DisplaySprite
 ; ===========================================================================
 
+Orb_Pause:	; Routine 10
+		subq.b	#1,$2E(a0)		; decrease timer
+		bne.s	Orb_ChkDel2.skip		; if it hasn't run out, branch
+		move.b	#4,obRoutine(a0)	; go back to the normal routine
+		bra.s	Orb_ChkDel2.skip
+
+Orb_MoveOut:	; Routine 12
+		subq.b	#1,$2E(a0)		; decrease timer
+		bne.s	Orb_ChkDel2		; if it hasn't run out, branch
+		move.b	#6,obRoutine(a0)	; go back to the normal routine
+
 Orb_ChkDel2:	; Routine 8
 		bsr.w	SpeedToPos
+	.skip:
 		tst.b	obRender(a0)
 		bpl.w	DeleteObject
 		bra.w	DisplaySprite

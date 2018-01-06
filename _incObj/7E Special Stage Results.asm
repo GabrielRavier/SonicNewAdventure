@@ -33,8 +33,8 @@ SSR_Main:
 		movea.l	a0,a1
 		lea	(SSR_Config).l,a2
 		moveq	#3,d1
-		cmpi.w	#50,(v_rings).w	; do you have 50 or more rings?
-		bcs.s	SSR_Loop	; if no, branch
+		btst	#7,(v_continues).w	; is the "got continue" bit set?
+		beq.s	SSR_Loop	; if not, branch
 		addq.w	#1,d1		; if yes, add 1	to d1 (number of sprites)
 
 	SSR_Loop:
@@ -132,8 +132,9 @@ loc_C8C4:
 		sfx	sfx_Cash,0,0,0	; play "ker-ching" sound
 		addq.b	#2,obRoutine(a0)
 		move.w	#180,obTimeFrame(a0) ; set time delay to 3 seconds
-		cmpi.w	#50,(v_rings).w	; do you have at least 50 rings?
-		bcs.s	locret_C8EA	; if not, branch
+		btst	#7,(v_continues).w
+		beq.s	locret_C8EA	; if not, branch
+		bclr	#7,(v_continues).w
 		move.w	#60,obTimeFrame(a0) ; set time delay to 1 second
 		addq.b	#4,obRoutine(a0) ; goto "SSR_Continue" routine
 

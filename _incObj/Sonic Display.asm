@@ -26,15 +26,7 @@ Sonic_Display:
 		bne.s	.removeinvincible
 		cmpi.w	#$C,(v_air).w
 		bcs.s	.removeinvincible
-		moveq	#0,d0
-		move.b	(v_zone).w,d0
-		cmpi.w	#(id_LZ<<8)+3,(v_zone).w ; check if level is SBZ3
-		bne.s	.music
-		moveq	#5,d0		; play SBZ music
-
-	.music:
-		lea	(MusicList2).l,a1
-		move.b	(a1,d0.w),d0
+		move.w	(v_lvlmusic).w,d0
 		jsr	(PlaySound).l	; play normal music
 
 	.removeinvincible:

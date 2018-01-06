@@ -402,7 +402,8 @@ FMSetFreq:
 	divu.w	#$C,d5
 	swap	d5
 	add.w	d5,d5
-	move.w	FM_Notes(pc,d5.w),d6
+	lea	(FM_Notes).l,a0
+	move.w	(a0,d5.w),d6
 	swap	d5
 	andi.w	#7,d5
 	moveq	#$B,d0
@@ -732,7 +733,8 @@ Sound_ChkValue:	; For the love of god, don't rearrange the order of the groups, 
 	bhs.s	locret_71F4A			; Return if yes
 	add.w	d7,d7
 	add.w	d7,d7
-	jmp	Sound_ExIndex(pc,d7.w)
+	lea	(Sound_ExIndex).l,a0
+	jmp	(a0,d7.w)
 ; ===========================================================================
 
 Sound_ExIndex:
@@ -1283,7 +1285,8 @@ Sound_PlaySFX:
 	move.b	d0,(SMPS_psg_input).l	; Silence PSG 4 (noise), too
 ; loc_7226E:
 .sfxoverridedone:
-	movea.w	SFX_SFXChannelRAM(pc,d3.w),a5
+	lea	(SFX_SFXChannelRAM).l,a5
+	movea.w	(a5,d3.w),a5
 	movea.l	a5,a2
 	moveq	#(SMPS_Track.len/4)-1,d0	; $30 bytes
 	moveq	#0,d2
@@ -2234,7 +2237,10 @@ PSGSetFreq:
 	add.b	SMPS_Track.Transpose(a5),d5	; Add in channel transposition
 	andi.w	#$7F,d5			; Clear high byte and sign bit
 	add.w	d5,d5
-	move.w	PSGFrequencies(pc,d5.w),SMPS_Track.Freq(a5)	; Set new frequency
+	movea.l	a6,-(sp)
+	lea	(PSGFrequencies).l,a6
+	move.w	(a6,d5.w),SMPS_Track.Freq(a5)	; Set new frequency
+	movea.l	(sp)+,a6
 	; Clownacy | Sonic 2's driver doesn't continue to FinishTrackUpdate
 	rts
 ; ===========================================================================
@@ -2461,7 +2467,8 @@ CoordFlag:
 	move.b	(a4)+,d5	; Clownacy | The true coord flag value follows the $FF
 	add.w	d5,d5
 	add.w	d5,d5
-	jmp	coordflagLookup(pc,d5.w)
+	lea	(coordflagLookup).l,a0
+	jmp	(a0,d5.w)
 ; End of function CoordFlag
 
 ; ===========================================================================

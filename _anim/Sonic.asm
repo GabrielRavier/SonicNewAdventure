@@ -39,6 +39,8 @@ ptr_Dash:	dc.w SonAni_Dash-Ani_Sonic
 ptr_PeeloutCharge:	dc.w SonAni_PeeloutCharge-Ani_Sonic
 ptr_BalanceForward: dc.w SonAni_BalanceForward-Ani_Sonic
 ptr_BalanceBack:	dc.w SonAni_BalanceBack-Ani_Sonic
+ptr_Fall:	dc.w SonAni_Fall-Ani_Sonic
+ptr_Fall2:	dc.w SonAni_Fall2-Ani_Sonic
 
 SonAni_Walk:	dc.b $FF, fr_Walk13, fr_Walk14,	fr_Walk15, fr_Walk16, fr_Walk11, fr_Walk12, afEnd
 		even
@@ -117,6 +119,10 @@ SonAni_BalanceForward:	dc.b $F, fr_BalanceForward1, fr_BalanceForward2, fr_Balan
 		even
 SonAni_BalanceBack:	dc.b $F, fr_BalanceBack1, fr_BalanceBack2, fr_BalanceBack3,fr_BalanceBack4, afEnd
 		even
+SonAni_Fall:	dc.b 3, fr_Fall1, fr_Fall2, afEnd
+		even
+SonAni_Fall2:	dc.b 1, fr_Fall1, fr_Fall2, afEnd
+		even
 
 id_Walk:	equ (ptr_Walk-Ani_Sonic)/2	; 0
 id_Run:		equ (ptr_Run-Ani_Sonic)/2	; 1
@@ -154,3 +160,5 @@ id_Dash:	equ (ptr_Dash-Ani_Sonic)/2
 id_PeeloutCharge:	equ (ptr_PeeloutCharge-Ani_Sonic)/2
 id_BalanceForward:	equ (ptr_BalanceForward-Ani_Sonic)/2
 id_BalanceBack:	equ (ptr_BalanceBack-Ani_Sonic)/2
+id_Fall:	equ (ptr_Fall-Ani_Sonic)/2
+id_Fall2:	equ (ptr_Fall2-Ani_Sonic)/2

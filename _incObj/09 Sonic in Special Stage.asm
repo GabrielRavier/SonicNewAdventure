@@ -497,6 +497,7 @@ Obj09_GetCont:
 		bset	#0,(v_lifecount).w
 		bne.s	Obj09_NoCont
 		addq.b	#1,(v_continues).w ; add 1 to number of continues
+		bset	#7,(v_continues).w	; set "got continue" flag bit
 		music	sfx_Continue,0,0,0	; play extra continue sound
 
 Obj09_NoCont:
@@ -513,10 +514,10 @@ Obj09_Chk1Up:
 		move.l	a1,4(a2)
 
 Obj09_Get1Up:
-		addq.b	#1,(v_lives).w	; add 1 to number of lives
-		addq.b	#1,(f_lifecount).w ; update the lives counter
-		music	bgm_ExtraLife,0,0,0	; play extra life music
-		moveq	#0,d4
+		addq.b	#1,(v_continues).w ; add 1 to number of continues
+		bset	#7,(v_continues).w	; set "got continue" flag bit
+		sfx		sfx_Continue,0,0,0	; play continue music
+		addq.b	#1,(v_lastspecial).w	; inc SS index
 		rts	
 ; ===========================================================================
 
@@ -540,9 +541,9 @@ Obj09_GetEmer:
 		move.b	d4,(a2,d0.w)
 		addq.b	#1,(v_emeralds).w ; add 1 to number of emeralds
 		addq.b	#1,(v_lastspecial).w	; increase SS index
-		clr.b	(f_timecount).w	; stop the time counter
 
 Obj09_NoEmer:
+		clr.b	(f_timecount).w	; stop the time counter
 		sfx	bgm_Emerald,0,0,0 ;	play emerald music
 		moveq	#0,d4
 		rts	

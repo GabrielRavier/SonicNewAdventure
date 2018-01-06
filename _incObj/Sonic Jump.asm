@@ -37,10 +37,6 @@ loc_1341C:
 		move.b	#1,$3C(a0)
 		clr.b	$38(a0)
 		sfx	sfx_Jump,0,0,0	; play jumping sound
-		move.b	#$13,obHeight(a0)
-		move.b	#9,obWidth(a0)
-		btst	#2,obStatus(a0)
-		bne.s	loc_13490
 		move.b	#$E,obHeight(a0)
 		move.b	#7,obWidth(a0)
 		move.b	#id_Roll,obAnim(a0) ; use "jumping" animation
@@ -48,10 +44,5 @@ loc_1341C:
 		addq.w	#5,obY(a0)
 
 locret_1348E:
-		rts	
-; ===========================================================================
-
-loc_13490:
-		bset	#4,obStatus(a0)
 		rts	
 ; End of function Sonic_Jump

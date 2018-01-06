@@ -121,6 +121,11 @@ LBlk_Action:	; Routine 2
 
 .type04:
 		bsr.w	SpeedToPos
+		cmpi.w	#-$200,obVelY(a0)
+		beq.s	.attopspeed
+		subq.w	#8,obVelY(a0)	; make block rise
+		
+	.attopspeed:
 		subq.w	#8,obVelY(a0)	; make block rise
 		bsr.w	ObjHitCeiling
 		tst.w	d1		; has block hit the ceiling?
