@@ -37,6 +37,8 @@ ptr_Float4:	dc.w SonAni_Float4-Ani_Sonic
 ptr_Spindash:   dc.w SonAni_Spindash-Ani_Sonic
 ptr_Dash:	dc.w SonAni_Dash-Ani_Sonic
 ptr_PeeloutCharge:	dc.w SonAni_PeeloutCharge-Ani_Sonic
+ptr_BalanceForward: dc.w SonAni_BalanceForward-Ani_Sonic
+ptr_BalanceBack:	dc.w SonAni_BalanceBack-Ani_Sonic
 
 SonAni_Walk:	dc.b $FF, fr_Walk13, fr_Walk14,	fr_Walk15, fr_Walk16, fr_Walk11, fr_Walk12, afEnd
 		even
@@ -104,12 +106,16 @@ SonAni_Float4:	dc.b 3,	fr_Float1, afChange, id_Walk
 		even
 SonAni_Spindash:	dc.b 0, fr_Spindash1, fr_Spindash2, fr_Spindash1, fr_Spindash3, fr_Spindash1, fr_Spindash4, fr_Spindash1, fr_Spindash5, fr_Spindash1, fr_Spindash6, afEnd
 		even
-SonAni_Dash:	dc.b $FF,  fr_dash11,  fr_dash12,  fr_dash13,  fr_dash14,     afEnd,     afEnd, afEnd
+SonAni_Dash:	dc.b $FF,  fr_Dash11,  fr_Dash12,  fr_Dash13,  fr_Dash14,     afEnd,     afEnd, afEnd
 		even
-SonAni_PeeloutCharge:	dc.b 0,  fr_walk13, fr_walk13, fr_walk13, fr_walk13, fr_walk13, fr_walk13, fr_walk13, fr_walk13
-		dc.b	fr_walk14, fr_walk14, fr_walk14, fr_walk14, fr_walk15, fr_walk15, fr_run14, fr_run14
+SonAni_PeeloutCharge:	dc.b 0,  fr_Walk13, fr_Walk13, fr_Walk13, fr_Walk13, fr_Walk13, fr_Walk13, fr_Walk13, fr_Walk13
+		dc.b	fr_Walk14, fr_Walk14, fr_Walk14, fr_Walk14, fr_Walk15, fr_Walk15, fr_Run14, fr_Run14
 		dc.b	fr_Run11,  fr_Run12,  fr_Run13,  fr_Run14, fr_Run11,  fr_Run12,  fr_Run13,  fr_Run14
-		dc.b	fr_dash11,  fr_dash12,  fr_dash13,  fr_dash14, afBack, 4
+		dc.b	fr_Dash11,  fr_Dash12,  fr_Dash13,  fr_Dash14, afBack, 4
+		even
+SonAni_BalanceForward:	dc.b $F, fr_BalanceForward1, fr_BalanceForward2, fr_BalanceForward3, fr_BalanceForward4, afEnd
+		even
+SonAni_BalanceBack:	dc.b $F, fr_BalanceBack1, fr_BalanceBack2, fr_BalanceBack3,fr_BalanceBack4, afEnd
 		even
 
 id_Walk:	equ (ptr_Walk-Ani_Sonic)/2	; 0
@@ -146,3 +152,5 @@ id_Float4:	equ (ptr_Float4-Ani_Sonic)/2	; $1E
 id_Spindash:	equ (ptr_Spindash-Ani_Sonic)/2
 id_Dash:	equ (ptr_Dash-Ani_Sonic)/2
 id_PeeloutCharge:	equ (ptr_PeeloutCharge-Ani_Sonic)/2
+id_BalanceForward:	equ (ptr_BalanceForward-Ani_Sonic)/2
+id_BalanceBack:	equ (ptr_BalanceBack-Ani_Sonic)/2

@@ -69,6 +69,12 @@ Pow_ChkShoes:
 		move.w	#$C00,(v_sonspeedmax).w ; change Sonic's top speed
 		move.w	#$18,(v_sonspeedacc).w	; change Sonic's acceleration
 		move.w	#$80,(v_sonspeeddec).w	; change Sonic's deceleration
+		btst	#6,(v_player+obStatus).w	; is Sonic underwater?
+		beq.s	.isdry		; if not, branch
+		move.w	#$600,(v_sonspeedmax).w ; change Sonic's top speed
+		move.w	#$C,(v_sonspeedacc).w	; change Sonic's acceleration
+		move.w	#$40,(v_sonspeeddec).w	; change Sonic's deceleration
+	.isdry:
 		music	bgm_Speedup,1,0,0		; Speed	up the music
 ; ===========================================================================
 

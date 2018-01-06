@@ -17,6 +17,7 @@ HUD_Update:
 		bsr.w	Hud_Base
 		move.b	#1,(f_scorecount).w
 		move.b	#1,(f_ringcount).w
+		clr.b	(f_debughud).w
 	.proceed:
 		tst.b	(f_scorecount).w ; does the score need updating?
 		beq.s	.chkrings	; if not, branch
@@ -41,16 +42,28 @@ HUD_Update:
 
 	.chktime:
 		tst.b	(f_timecount).w	; does the time	need updating?
-		beq.s	.chklives	; if not, branch
+		beq.w	.chklives	; if not, branch
 		tst.w	(f_pause).w	; is the game paused?
-		bne.s	.chklives	; if yes, branch
+		bne.w	.chklives	; if yes, branch
 		lea	(v_time).w,a1
-		cmpi.l	#(9*$10000)+(59*$100)+59,(a1)+ ; is the time 9:59:59?
+		cmpi.l	#$93B63,(a1)+	; is the time 9'59"99?
 		beq.w	TimeOver	; if yes, branch
-
-		addq.b	#1,-(a1)	; increment 1/60s counter
-		cmpi.b	#60,(a1)	; check if passed 60
-		bcs.s	.debugupdate
+		move.b	(v_centstep).w,d1
+		addi.b	#1,d1
+		cmpi.b	#3,d1
+		bne.s	.skip
+		move.b	#0,d1
+		
+	.skip:
+		move.b	d1,(v_centstep).w
+		cmpi.b	#2,d1
+		beq.s	.skip2
+		addi.b	#1,d1
+		
+	.skip2:
+		add.b	d1,-(a1)
+		cmpi.b	#100,(a1)
+		bcs.s	.updatecent
 		move.b	#0,(a1)
 		addq.b	#1,-(a1)	; increment second counter
 		cmpi.b	#60,(a1)	; check if passed 60
@@ -60,11 +73,6 @@ HUD_Update:
 		cmpi.b	#9,(a1)		; check if passed 9
 		bcs.s	.updatetime
 		move.b	#9,(a1)		; keep as 9
-	
-	.debugupdate:
-		tst.b	(f_debughud).w
-		beq.s	.chklives
-		clr.b	(f_debughud).w
 
 	.updatetime:
 		hudVRAM	$DE40
@@ -74,6 +82,11 @@ HUD_Update:
 		hudVRAM	$DEC0
 		moveq	#0,d1
 		move.b	(v_timesec).w,d1 ; load	seconds
+		bsr.w	Hud_Secs
+	.updatecent:
+		hudVRAM	$D780
+		moveq	#0,d1
+		move.b	(v_timecent).w,d1 ; load centiseconds
 		bsr.w	Hud_Secs
 
 	.chklives:
@@ -163,6 +176,20 @@ Hud_LoadZero:
 ; End of function Hud_LoadZero
 
 ; ---------------------------------------------------------------------------
+; Subroutine to	load " on the	HUD
+; ---------------------------------------------------------------------------
+
+; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
+
+
+Hud_LoadMarks:				; XREF: HUD_Update
+		locVRAM	$D740
+		lea	Hud_TilesMarks(pc),a2
+		move.w	#2,d2
+		bra.s	loc_1C83E
+; End of function Hud_LoadMarks
+
+; ---------------------------------------------------------------------------
 ; Subroutine to	load uncompressed HUD patterns ("E", "0", colon)
 ; ---------------------------------------------------------------------------
 
@@ -172,6 +199,7 @@ Hud_LoadZero:
 Hud_Base:
 		lea	($C00000).l,a6
 		bsr.w	Hud_Lives
+		bsr.s	Hud_LoadMarks
 		locVRAM	$DC40
 		lea	Hud_TilesBase(pc),a2
 		move.w	#$E,d2
@@ -205,6 +233,7 @@ loc_1C85E:
 ; End of function Hud_Base
 
 ; ===========================================================================
+Hud_TilesMarks:	dc.b $18, 0, 0, 0
 Hud_TilesBase:	dc.b $16, $FF, $FF, $FF, $FF, $FF, $FF,	0, 0, $14, 0, 0
 Hud_TilesZero:	dc.b $FF, $FF, 0, 0
 ; ---------------------------------------------------------------------------

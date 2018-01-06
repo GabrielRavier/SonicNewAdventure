@@ -39,6 +39,21 @@ Shi_Shield:	; Routine 2
 		move.w	(v_player+obX).w,obX(a0)
 		move.w	(v_player+obY).w,obY(a0)
 		move.b	(v_player+obStatus).w,obStatus(a0)
+		move.b	obStatus(a0),d0
+		move.w	#$A,d1
+		cmpi.b	#id_BalanceForward,(v_player+obAnim).w
+		beq.s	.shift
+		cmpi.b	#id_BalanceBack,(v_player+obAnim).w
+		bne.s	.noshift
+		bchg	#0,d0
+		move.w	#4,d1
+	.shift:
+		sub.w	d1,obX(a0)
+		btst	#0,d0
+		beq.s	.noshift
+		add.w	d1,d1
+		add.w	d1,obX(a0)
+	.noshift:
 		lea	(Ani_Shield).l,a1
 		jsr	(AnimateSprite).l
 		jmp	(DisplaySprite).l

@@ -48,33 +48,34 @@ Sonic_Move:
 		add.w	obX(a0),d1
 		sub.w	obX(a1),d1
 		cmpi.w	#4,d1
-		blt.s	loc_12F6A
+		blt.s	Sonic_BalanceLeft
 		cmp.w	d2,d1
-		bge.s	loc_12F5A
+		bge.s	Sonic_BalanceRight
 		bra.s	Sonic_LookUp
-; ===========================================================================
 
 Sonic_Balance:
-		jsr	(ObjFloorDist).l
+		jsr	ObjFloorDist
 		cmpi.w	#$C,d1
 		blt.s	Sonic_LookUp
 		cmpi.b	#3,$36(a0)
-		bne.s	loc_12F62
-
-loc_12F5A:
-		bclr	#0,obStatus(a0)
-		bra.s	loc_12F70
-; ===========================================================================
-
-loc_12F62:
+		beq.s	Sonic_BalanceRight
 		cmpi.b	#3,$37(a0)
 		bne.s	Sonic_LookUp
 
-loc_12F6A:
-		bset	#0,obStatus(a0)
+Sonic_BalanceLeft:
+		btst	#0,obStatus(a0)	; is Sonic facing left?
+		beq.s	Sonic_BalanceBackward	; if not, balance backward
+		move.b	#id_BalanceForward,obAnim(a0) ; use forward balancing animation
+		bra.w	Sonic_ResetScr	; branch
 
-loc_12F70:
-		move.b	#id_Balance,obAnim(a0) ; use "balancing" animation
+Sonic_BalanceRight:
+		btst	#0,obStatus(a0)	; is Sonic facing left?
+		bne.s	Sonic_BalanceBackward	; if so, balance backward
+		move.b	#id_BalanceForward,obAnim(a0) ; use forward balancing animation
+		bra.w	Sonic_ResetScr	; branch
+
+Sonic_BalanceBackward:
+		move.b	#id_BalanceBack,obAnim(a0) ; use backward balancing animation
 		bra.w	Sonic_ResetScr
 ; ===========================================================================
 

@@ -112,6 +112,14 @@ SonicDynPLC_internal:
 		dc.w SonPLC_Dash42-SonicDynPLC_internal
 		dc.w SonPLC_Dash43-SonicDynPLC_internal
 		dc.w SonPLC_Dash44-SonicDynPLC_internal
+		dc.w SonPLC_BalanceForward1-SonicDynPLC_internal
+		dc.w SonPLC_BalanceForward2-SonicDynPLC_internal
+		dc.w SonPLC_BalanceForward3-SonicDynPLC_internal
+		dc.w SonPLC_BalanceForward4-SonicDynPLC_internal
+		dc.w SonPLC_BalanceBack1-SonicDynPLC_internal
+		dc.w SonPLC_BalanceBack2-SonicDynPLC_internal
+		dc.w SonPLC_BalanceBack3-SonicDynPLC_internal
+		dc.w SonPLC_BalanceBack4-SonicDynPLC_internal
 SonPLC_Null:	dc.b 0
 SonPLC_Stand:	dc.b 4,	$20, 0,	$70, 3,	$20, $B, $20, $E
 SonPLC_Wait1:	dc.b 3,	$50, $11, $50, $17, $20, $1D
@@ -220,4 +228,12 @@ SonPLC_Dash41:	dc.b 4, $56, $57, $26, $5D, $B6, $60, $16, $6C
 SonPLC_Dash42:	dc.b 3, $16, $6E, $26, $70, $F6, $73	
 SonPLC_Dash43:	dc.b 5, $26, $83, $B6, $86, $26, $92, $16, $95, $26, $97	
 SonPLC_Dash44:	dc.b 3, $16, $9A, $26, $9C, $F6, $9F	
+SonPLC_BalanceForward1:	dc.b 4, $26, $FB, $B6, $FE, 7, $A, $37, $B	
+SonPLC_BalanceForward2:	dc.b 4, 7, $F, $F7, $10, $26, $FB, 6, $FE	
+SonPLC_BalanceForward3:	dc.b 3, $B7, $20, $37, $2C, $37, $30	
+SonPLC_BalanceForward4:	dc.b 2, $B7, $34, $77, $40	
+SonPLC_BalanceBack1:	dc.b 3, $B6, $AF, $26, $BB, $56, $BE	
+SonPLC_BalanceBack2:	dc.b 4, $B6, $C4, $16, $D0, $36, $D2, 6, $D6	
+SonPLC_BalanceBack3:	dc.b 3, $B6, $D7, $36, $E3, $16, $D0	
+SonPLC_BalanceBack4:	dc.b 4, $B6, $E7, $26, $F3, $26, $F6, $16, $F9	
 		even

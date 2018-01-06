@@ -3,31 +3,31 @@
 ; ---------------------------------------------------------------------------
 DynPLC_Dust_internal:	
 		dc.w .null-DynPLC_Dust_internal
-		dc.w .f1-DynPLC_Dust_internal
-		dc.w .f2-DynPLC_Dust_internal
-		dc.w .f3-DynPLC_Dust_internal
-		dc.w .f4-DynPLC_Dust_internal
-		dc.w .f5-DynPLC_Dust_internal
-		dc.w .f6-DynPLC_Dust_internal
-		dc.w .f7-DynPLC_Dust_internal
+		dc.w .dash1-DynPLC_Dust_internal
+		dc.w .dash2-DynPLC_Dust_internal
+		dc.w .dash3-DynPLC_Dust_internal
+		dc.w .dash4-DynPLC_Dust_internal
+		dc.w .dash5-DynPLC_Dust_internal
+		dc.w .dash6-DynPLC_Dust_internal
+		dc.w .dash7-DynPLC_Dust_internal
 		
-.null:	dc 0
-.f1:	dc 1
+.null:	dc.w 0
+.dash1:	dc.w 1
 		dc.w $7000
-.f2:	dc 1
+.dash2:	dc.w 1
 		dc.w $7008
-.f3:	dc 1
+.dash3:	dc.w 1
 		dc.w $7010
-.f4:	dc 2
+.dash4:	dc.w 2
 		dc.w $1018
 		dc.w $701A
-.f5:	dc 2
+.dash5:	dc.w 2
 		dc.w $3022
 		dc.w $7026
-.f6:	dc 2
+.dash6:	dc.w 2
 		dc.w $502E
 		dc.w $7034
-.f7:	dc 2
+.dash7:	dc.w 2
 		dc.w $503C
 		dc.w $7042
 		even

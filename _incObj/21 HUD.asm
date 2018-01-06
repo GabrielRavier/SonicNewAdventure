@@ -17,7 +17,12 @@ HUD_Main:	; Routine 0
 		move.w	#$90,obX(a0)
 		move.w	#$108,obScreenY(a0)
 		move.l	#Map_HUD,obMap(a0)
-		move.w	#$6CA,obGfx(a0)
+		move.w	#$6BA,obGfx(a0)
+		cmpi.b	#id_SonicSpecial,(v_player).w ; is Special Stage Sonic here?
+		bne.s	.notss	; if not, branch
+		move.l	#Map_SS_HUD,obMap(a0)
+		move.w	#$1E9,obGfx(a0)
+	.notss:
 		move.b	#0,obRender(a0)
 		move.b	#0,obPriority(a0)
 
@@ -31,6 +36,8 @@ HUD_Flash:	; Routine 2
 ; ===========================================================================
 
 .norings:
+		cmpi.b	#id_SonicSpecial,(v_player).w ; is Special Stage Sonic here?
+		beq.s	.display	; if yes, branch, and don't bother checking the time
 		cmpi.b	#9,(v_timemin).w ; have	9 minutes elapsed?
 		bne.s	.display	; if not, branch
 		addq.w	#2,d0		; make time counter flash red

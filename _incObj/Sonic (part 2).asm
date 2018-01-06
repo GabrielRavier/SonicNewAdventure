@@ -3,6 +3,7 @@
 ; ---------------------------------------------------------------------------
 
 Sonic_Hurt:	; Routine 4
+		clr.b	(v_cameralag).w
 		jsr	(SpeedToPos).l
 		addi.w	#$30,obVelY(a0)
 		btst	#6,obStatus(a0)
@@ -13,6 +14,7 @@ loc_1380C:
 		bsr.w	Sonic_HurtStop
 		bsr.w	Sonic_LevelBound
 		bsr.w	Sonic_RecordPosition
+		bsr.w	Sonic_Water
 		bsr.w	Sonic_Animate
 		bsr.w	Sonic_LoadGfx
 		jmp	(DisplaySprite).l
@@ -64,8 +66,12 @@ GameOver:
 		move.w	#-$38,obVelY(a0)
 		addq.b	#2,obRoutine(a0)
 		clr.b	(f_timecount).w	; stop time counter
+		cmpi.b	#0,(v_lives).w	; are lives at min?
+		beq.s	.skip	; if yes, branch
 		addq.b	#1,(f_lifecount).w ; update lives counter
 		subq.b	#1,(v_lives).w	; subtract 1 from number of lives
+		bne.s	loc_138D4
+	.skip:
 		bne.s	loc_138D4
 		move.b	#0,$3A(a0)
 		move.b	#id_GameOverCard,(v_objspace+$80).w ; load GAME object

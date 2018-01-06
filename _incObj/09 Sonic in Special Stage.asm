@@ -539,6 +539,8 @@ Obj09_GetEmer:
 		lea	(v_emldlist).w,a2
 		move.b	d4,(a2,d0.w)
 		addq.b	#1,(v_emeralds).w ; add 1 to number of emeralds
+		addq.b	#1,(v_lastspecial).w	; increase SS index
+		clr.b	(f_timecount).w	; stop the time counter
 
 Obj09_NoEmer:
 		sfx	bgm_Emerald,0,0,0 ;	play emerald music
@@ -649,6 +651,7 @@ Obj09_GOAL:
 		cmpi.b	#$27,d0		; is the item a	"GOAL"?
 		bne.s	Obj09_UPblock
 		addq.b	#2,obRoutine(a0) ; run routine "Obj09_ExitStage"
+		clr.b	(f_timecount).w	; stop the time counter
 		sfx	sfx_SSGoal,0,0,0	; play "GOAL" sound
 		rts	
 ; ===========================================================================

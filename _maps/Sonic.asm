@@ -113,6 +113,14 @@ ptr_MS_Dash41:	dc.w MS_Dash41-Map_Sonic_internal
 ptr_MS_Dash42:	dc.w MS_Dash42-Map_Sonic_internal
 ptr_MS_Dash43:	dc.w MS_Dash43-Map_Sonic_internal
 ptr_MS_Dash44:	dc.w MS_Dash44-Map_Sonic_internal
+ptr_MS_BalanceForward1:	dc.w MS_BalanceForward1-Map_Sonic_internal
+ptr_MS_BalanceForward2:	dc.w MS_BalanceForward2-Map_Sonic_internal
+ptr_MS_BalanceForward3:	dc.w MS_BalanceForward3-Map_Sonic_internal
+ptr_MS_BalanceForward4:	dc.w MS_BalanceForward4-Map_Sonic_internal
+ptr_MS_BalanceBack1:	dc.w MS_BalanceBack1-Map_Sonic_internal
+ptr_MS_BalanceBack2:	dc.w MS_BalanceBack2-Map_Sonic_internal
+ptr_MS_BalanceBack3:	dc.w MS_BalanceBack3-Map_Sonic_internal
+ptr_MS_BalanceBack4:	dc.w MS_BalanceBack4-Map_Sonic_internal
 
 MS_Null:	dc.b 0
 MS_Stand:	dc.b 4			; standing
@@ -487,11 +495,11 @@ MS_Dash14:	dc.b 2
 		dc.b $FC, 1, 0, 0, $EC	
 		dc.b $F4, $F, 0, 2, $F4	
 MS_Dash21:	dc.b 5	
-		dc.b $F0, 8, 0, 0, $FC	
-		dc.b $F8, $E, 0, 3, $F4	
-		dc.b $F8, 2, 0, $F, $14	
-		dc.b $10, 5, 0, $12, $F4	
-		dc.b $10, 0, 0, $16, 4	
+		dc.b $EF, 8, 0, 0, $FC	
+		dc.b $F7, $E, 0, 3, $F4	
+		dc.b $F7, 2, 0, $F, $14	
+		dc.b $F, 5, 0, $12, $F4	
+		dc.b $F, 0, 0, $16, 4	
 MS_Dash22:	dc.b 3	
 		dc.b $F0, 8, 0, 0, $FC	
 		dc.b $F8, $F, 0, 3, $F4	
@@ -503,9 +511,9 @@ MS_Dash23:	dc.b 5
 		dc.b $10, 5, 0, $12, $FB	
 		dc.b $10, 0, 0, $16, $B	
 MS_Dash24:	dc.b 3	
-		dc.b $F0, 8, 0, 0, $FC	
-		dc.b $F8, $F, 0, 3, $F4	
-		dc.b 0, 1, 0, $13, $14	
+		dc.b $EF, 8, 0, 0, $FC	
+		dc.b $F7, $F, 0, 3, $F4	
+		dc.b $FF, 1, 0, $13, $14	
 MS_Dash31:	dc.b 2	
 		dc.b $F0, $F, 0, 0, $F4	
 		dc.b $10, 8, 0, $10, $FC	
@@ -524,17 +532,171 @@ MS_Dash41:	dc.b 4
 		dc.b $F8, $E, 0, 9, $F4	
 		dc.b 0, 1, 0, $15, $14	
 MS_Dash42:	dc.b 3	
-		dc.b $E8, 4, 0, 0, $FC	
-		dc.b $F0, 2, 0, 2, $EC	
-		dc.b $F0, $F, 0, 5, $F4	
+		dc.b $E8, 4, 0, 0, $FD	
+		dc.b $F0, 2, 0, 2, $ED	
+		dc.b $F0, $F, 0, 5, $F5	
 MS_Dash43:	dc.b 5	
-		dc.b $E8, 8, 0, 0, $F4	
-		dc.b $F0, $E, 0, 3, $EC	
-		dc.b $F0, 2, 0, $F, $C	
-		dc.b $F8, 1, 0, $12, $14	
-		dc.b 8, 8, 0, $14, $FC	
+		dc.b $E9, 8, 0, 0, $F5	
+		dc.b $F1, $E, 0, 3, $ED	
+		dc.b $F1, 2, 0, $F, $D	
+		dc.b $F9, 1, 0, $12, $15	
+		dc.b 9, 8, 0, $14, $FD	
 MS_Dash44:	dc.b 3	
 		dc.b $E8, 4, 0, 0, $FC	
 		dc.b $F0, 2, 0, 2, $EC	
 		dc.b $F0, $F, 0, 5, $F4	
+MS_BalanceForward1:	dc.b 4	
+		dc.b $EC, 8, 8, 0, $EC	
+		dc.b $F4, $E, 8, 3, $EC	
+		dc.b $FC, 0, 8, $F, $E4	
+		dc.b $C, $C, 8, $10, $E4	
+MS_BalanceForward2:	dc.b 4	
+		dc.b 4, 0, 8, 0, 4	
+		dc.b $F4, $F, 8, 1, $E4	
+		dc.b $EC, 8, 8, $11, $EC	
+		dc.b $F4, 0, 8, $14, 4	
+MS_BalanceForward3:	dc.b 3	
+		dc.b $EC, $E, 8, 0, $EC	
+		dc.b 4, $C, 8, $C, $E4	
+		dc.b $C, $C, 8, $10, $EC	
+MS_BalanceForward4:	dc.b 2	
+		dc.b $EC, $E, 8, 0, $EC	
+		dc.b 4, $D, 8, $C, $E4	
+MS_BalanceBack1:	dc.b 3	
+		dc.b $EC, $E, 8, 0, $ED	
+		dc.b $F4, 2, 8, $C, $D	
+		dc.b 4, 9, 8, $F, $F5	
+MS_BalanceBack2:	dc.b 4	
+		dc.b $EC, $E, 8, 0, $ED	
+		dc.b $FC, 1, 8, $C, $D	
+		dc.b 4, 5, 8, $E, $FD	
+		dc.b 4, 0, 8, $12, $F5	
+MS_BalanceBack3:	dc.b 3	
+		dc.b $EC, $E, 8, 0, $ED	
+		dc.b 4, 5, 8, $C, $FD	
+		dc.b $FC, 1, 8, $10, $D	
+MS_BalanceBack4:	dc.b 4	
+		dc.b $EC, $E, 8, 0, $ED	
+		dc.b $F4, 2, 8, $C, $D	
+		dc.b 4, 8, 8, $F, $ED	
+		dc.b $C, 4, 8, $12, $FD	
 		even
+
+fr_Null:	equ (ptr_MS_Null-Map_Sonic)/2		; 0
+fr_Stand:	equ (ptr_MS_Stand-Map_Sonic)/2		; 1
+fr_Wait1:	equ (ptr_MS_Wait1-Map_Sonic)/2		; 2
+fr_Wait2:	equ (ptr_MS_Wait2-Map_Sonic)/2		; 3
+fr_Wait3:	equ (ptr_MS_Wait3-Map_Sonic)/2		; 4
+fr_LookUp:	equ (ptr_MS_LookUp-Map_Sonic)/2		; 5
+fr_Walk11:	equ (ptr_MS_Walk11-Map_Sonic)/2		; 6
+fr_Walk12:	equ (ptr_MS_Walk12-Map_Sonic)/2		; 7
+fr_Walk13:	equ (ptr_MS_Walk13-Map_Sonic)/2		; 8
+fr_Walk14:	equ (ptr_MS_Walk14-Map_Sonic)/2		; 9
+fr_Walk15:	equ (ptr_MS_Walk15-Map_Sonic)/2		; $A
+fr_Walk16:	equ (ptr_MS_Walk16-Map_Sonic)/2		; $B
+fr_Walk21:	equ (ptr_MS_Walk21-Map_Sonic)/2		; $C
+fr_Walk22:	equ (ptr_MS_Walk22-Map_Sonic)/2		; $D
+fr_Walk23:	equ (ptr_MS_Walk23-Map_Sonic)/2		; $E
+fr_Walk24:	equ (ptr_MS_Walk24-Map_Sonic)/2		; $F
+fr_Walk25:	equ (ptr_MS_Walk25-Map_Sonic)/2		; $10
+fr_Walk26:	equ (ptr_MS_Walk26-Map_Sonic)/2		; $11
+fr_Walk31:	equ (ptr_MS_Walk31-Map_Sonic)/2		; $12
+fr_Walk32:	equ (ptr_MS_Walk32-Map_Sonic)/2		; $13
+fr_Walk33:	equ (ptr_MS_Walk33-Map_Sonic)/2		; $14
+fr_Walk34:	equ (ptr_MS_Walk34-Map_Sonic)/2		; $15
+fr_Walk35:	equ (ptr_MS_Walk35-Map_Sonic)/2		; $16
+fr_Walk36:	equ (ptr_MS_Walk36-Map_Sonic)/2		; $17
+fr_Walk41:	equ (ptr_MS_Walk41-Map_Sonic)/2		; $18
+fr_Walk42:	equ (ptr_MS_Walk42-Map_Sonic)/2		; $19
+fr_Walk43:	equ (ptr_MS_Walk43-Map_Sonic)/2		; $1A
+fr_Walk44:	equ (ptr_MS_Walk44-Map_Sonic)/2		; $1B
+fr_Walk45:	equ (ptr_MS_Walk45-Map_Sonic)/2		; $1C
+fr_Walk46:	equ (ptr_MS_Walk46-Map_Sonic)/2		; $1D
+fr_Run11:	equ (ptr_MS_Run11-Map_Sonic)/2		; $1E
+fr_Run12:	equ (ptr_MS_Run12-Map_Sonic)/2		; $1F
+fr_Run13:	equ (ptr_MS_Run13-Map_Sonic)/2		; $20
+fr_Run14:	equ (ptr_MS_Run14-Map_Sonic)/2		; $21
+fr_Run21:	equ (ptr_MS_Run21-Map_Sonic)/2		; $22
+fr_Run22:	equ (ptr_MS_Run22-Map_Sonic)/2		; $23
+fr_Run23:	equ (ptr_MS_Run23-Map_Sonic)/2		; $24
+fr_Run24:	equ (ptr_MS_Run24-Map_Sonic)/2		; $25
+fr_Run31:	equ (ptr_MS_Run31-Map_Sonic)/2		; $26
+fr_Run32:	equ (ptr_MS_Run32-Map_Sonic)/2		; $27
+fr_Run33:	equ (ptr_MS_Run33-Map_Sonic)/2		; $28
+fr_Run34:	equ (ptr_MS_Run34-Map_Sonic)/2		; $29
+fr_Run41:	equ (ptr_MS_Run41-Map_Sonic)/2		; $2A
+fr_Run42:	equ (ptr_MS_Run42-Map_Sonic)/2		; $2B
+fr_Run43:	equ (ptr_MS_Run43-Map_Sonic)/2		; $2C
+fr_Run44:	equ (ptr_MS_Run44-Map_Sonic)/2		; $2D
+fr_Roll1:	equ (ptr_MS_Roll1-Map_Sonic)/2		; $2E
+fr_Roll2:	equ (ptr_MS_Roll2-Map_Sonic)/2		; $2F
+fr_Roll3:	equ (ptr_MS_Roll3-Map_Sonic)/2		; $30
+fr_Roll4:	equ (ptr_MS_Roll4-Map_Sonic)/2		; $31
+fr_Roll5:	equ (ptr_MS_Roll5-Map_Sonic)/2		; $32
+fr_Warp1:	equ (ptr_MS_Warp1-Map_Sonic)/2		; $33
+fr_Warp2:	equ (ptr_MS_Warp2-Map_Sonic)/2		; $34
+fr_Warp3:	equ (ptr_MS_Warp3-Map_Sonic)/2		; $35
+fr_Warp4:	equ (ptr_MS_Warp4-Map_Sonic)/2		; $36
+fr_Stop1:	equ (ptr_MS_Stop1-Map_Sonic)/2		; $37
+fr_Stop2:	equ (ptr_MS_Stop2-Map_Sonic)/2		; $38
+fr_Duck:	equ (ptr_MS_Duck-Map_Sonic)/2		; $39
+fr_Balance1:	equ (ptr_MS_Balance1-Map_Sonic)/2	; $3A
+fr_Balance2:	equ (ptr_MS_Balance2-Map_Sonic)/2	; $3B
+fr_Float1:	equ (ptr_MS_Float1-Map_Sonic)/2		; $3C
+fr_Float2:	equ (ptr_MS_Float2-Map_Sonic)/2		; $3D
+fr_Float3:	equ (ptr_MS_Float3-Map_Sonic)/2		; $3E
+fr_Float4:	equ (ptr_MS_Float4-Map_Sonic)/2		; $3F
+fr_Spring:	equ (ptr_MS_Spring-Map_Sonic)/2		; $40
+fr_Hang1:	equ (ptr_MS_Hang1-Map_Sonic)/2		; $41
+fr_Hang2:	equ (ptr_MS_Hang2-Map_Sonic)/2		; $42
+fr_Leap1:	equ (ptr_MS_Leap1-Map_Sonic)/2		; $43
+fr_Leap2:	equ (ptr_MS_Leap2-Map_Sonic)/2		; $44
+fr_Push1:	equ (ptr_MS_Push1-Map_Sonic)/2		; $45
+fr_Push2:	equ (ptr_MS_Push2-Map_Sonic)/2		; $46
+fr_Push3:	equ (ptr_MS_Push3-Map_Sonic)/2		; $47
+fr_Push4:	equ (ptr_MS_Push4-Map_Sonic)/2		; $48
+fr_Surf:	equ (ptr_MS_Surf-Map_Sonic)/2		; $49
+fr_BubStand:	equ (ptr_MS_BubStand-Map_Sonic)/2	; $4A
+fr_Burnt:	equ (ptr_MS_Burnt-Map_Sonic)/2		; $4B
+fr_Drown:	equ (ptr_MS_Drown-Map_Sonic)/2		; $4C
+fr_Death:	equ (ptr_MS_Death-Map_Sonic)/2		; $4D
+fr_Shrink1:	equ (ptr_MS_Shrink1-Map_Sonic)/2	; $4E
+fr_Shrink2:	equ (ptr_MS_Shrink2-Map_Sonic)/2	; $4F
+fr_Shrink3:	equ (ptr_MS_Shrink3-Map_Sonic)/2	; $50
+fr_Shrink4:	equ (ptr_MS_Shrink4-Map_Sonic)/2	; $51
+fr_Shrink5:	equ (ptr_MS_Shrink5-Map_Sonic)/2	; $52
+fr_Float5:	equ (ptr_MS_Float5-Map_Sonic)/2		; $53
+fr_Float6:	equ (ptr_MS_Float6-Map_Sonic)/2		; $54
+fr_Injury:	equ (ptr_MS_Injury-Map_Sonic)/2		; $55
+fr_GetAir:	equ (ptr_MS_GetAir-Map_Sonic)/2		; $56
+fr_WaterSlide:	equ (ptr_MS_WaterSlide-Map_Sonic)/2	; $57
+fr_Spindash1:	equ (ptr_MS_Spindash1-Map_Sonic)/2
+fr_Spindash2:	equ (ptr_MS_Spindash2-Map_Sonic)/2
+fr_Spindash3:	equ (ptr_MS_Spindash3-Map_Sonic)/2
+fr_Spindash4:	equ (ptr_MS_Spindash4-Map_Sonic)/2
+fr_Spindash5:	equ (ptr_MS_Spindash5-Map_Sonic)/2
+fr_Spindash6:	equ (ptr_MS_Spindash6-Map_Sonic)/2
+fr_Dash11:	equ (ptr_MS_Dash11-Map_Sonic)/2
+fr_Dash12:	equ (ptr_MS_Dash12-Map_Sonic)/2
+fr_Dash13:	equ (ptr_MS_Dash13-Map_Sonic)/2
+fr_Dash14:	equ (ptr_MS_Dash14-Map_Sonic)/2
+fr_Dash21:	equ (ptr_MS_Dash21-Map_Sonic)/2
+fr_Dash22:	equ (ptr_MS_Dash22-Map_Sonic)/2
+fr_Dash23:	equ (ptr_MS_Dash23-Map_Sonic)/2
+fr_Dash24:	equ (ptr_MS_Dash24-Map_Sonic)/2
+fr_Dash31:	equ (ptr_MS_Dash31-Map_Sonic)/2
+fr_Dash32:	equ (ptr_MS_Dash32-Map_Sonic)/2
+fr_Dash33:	equ (ptr_MS_Dash33-Map_Sonic)/2
+fr_Dash34:	equ (ptr_MS_Dash34-Map_Sonic)/2
+fr_Dash41:	equ (ptr_MS_Dash41-Map_Sonic)/2
+fr_Dash42:	equ (ptr_MS_Dash42-Map_Sonic)/2
+fr_Dash43:	equ (ptr_MS_Dash43-Map_Sonic)/2
+fr_Dash44:	equ (ptr_MS_Dash44-Map_Sonic)/2
+fr_BalanceForward1:	equ (ptr_MS_BalanceForward1-Map_Sonic)/2
+fr_BalanceForward2:	equ (ptr_MS_BalanceForward2-Map_Sonic)/2
+fr_BalanceForward3:	equ (ptr_MS_BalanceForward3-Map_Sonic)/2
+fr_BalanceForward4:	equ (ptr_MS_BalanceForward4-Map_Sonic)/2
+fr_BalanceBack1:	equ (ptr_MS_BalanceBack1-Map_Sonic)/2
+fr_BalanceBack2:	equ (ptr_MS_BalanceBack2-Map_Sonic)/2
+fr_BalanceBack3:	equ (ptr_MS_BalanceBack3-Map_Sonic)/2
+fr_BalanceBack4:	equ (ptr_MS_BalanceBack4-Map_Sonic)/2

@@ -1,8 +1,9 @@
 ; ---------------------------------------------------------------------------
 ; Sprite mappings - SCORE, TIME, RINGS
 ; ---------------------------------------------------------------------------
-Map_HUD_internal:	dc.w .allyellow-Map_HUD_internal, .ringred-Map_HUD_internal
-		dc.w .timered-Map_HUD_internal, .allred-Map_HUD_internal
+Map_SS_HUD_internal:
+		dc.w .allyellow-Map_SS_HUD_internal, .ringgone-Map_SS_HUD_internal
+		dc.w .timegone-Map_SS_HUD_internal, .bothgone-Map_SS_HUD_internal
 
 .allyellow:	dc.b $B
 		dc.b $80, $D, $80, $10, 0	; SCOR
@@ -14,10 +15,10 @@ Map_HUD_internal:	dc.w .allyellow-Map_HUD_internal, .ringred-Map_HUD_internal
 		dc.b $A0, $D, $80, $18, 0	; RING
 		dc.b $A0, 1, $80, $10, $20	; S
 		dc.b $A0, 9, $80, $40, $30	; rings
-		dc.b $40, 5, $81, $1A, 0	; icon
-		dc.b $40, $D, $81, $1E, $10	; SONIC x nn
+		dc.b $40, 5, $80, $46, 0	; icon
+		dc.b $40, $D, $80, $4A, $10	; SONIC x nn
 		dc.b 0
-.ringred:	dc.b $9
+.ringgone:	dc.b $9
 		dc.b $80, $D, $80, $10, 0	; SCOR
 		dc.b $80, $D, $80, $28,	$20	; E nnn
 		dc.b $80, $D, $80, $30,	$40	; nnnn
@@ -25,10 +26,10 @@ Map_HUD_internal:	dc.w .allyellow-Map_HUD_internal, .ringred-Map_HUD_internal
 		dc.b $90, $D, $80, $38,	$28	; n'nn
 			dc.b $90, 9, $80, $0,	$48	; "nn
 		dc.b $A0, 9, $80, $40, $30	; rings
-		dc.b $40, 5, $81, $1A, 0	; icon
-		dc.b $40, $D, $81, $1E, $10	; SONIC x nn
+		dc.b $40, 5, $80, $46, 0	; icon
+		dc.b $40, $D, $80, $4A, $10	; SONIC x nn
 		dc.b 0
-.timered:	dc.b $A
+.timegone:	dc.b $A
 		dc.b $80, $D, $80, $10, 0	; SCOR
 		dc.b $80, $D, $80, $28,	$20	; E nnn
 		dc.b $80, $D, $80, $30,	$40	; nnnn
@@ -37,16 +38,17 @@ Map_HUD_internal:	dc.w .allyellow-Map_HUD_internal, .ringred-Map_HUD_internal
 		dc.b $A0, $D, $80, $18, 0	; RING
 		dc.b $A0, 1, $80, $10, $20	; S
 		dc.b $A0, 9, $80, $40, $30	; rings
-		dc.b $40, 5, $81, $1A, 0	; icon
-		dc.b $40, $D, $81, $1E, $10	; SONIC x nn
+		dc.b $40, 5, $80, $46, 0	; icon
+		dc.b $40, $D, $80, $4A, $10	; SONIC x nn
 		dc.b 0
-.allred:	dc.b $8
+.bothgone:	dc.b $8
 		dc.b $80, $D, $80, $10, 0	; SCOR
 		dc.b $80, $D, $80, $28,	$20	; E nnn
 		dc.b $80, $D, $80, $30,	$40	; nnnn
 		dc.b $90, $D, $80, $38,	$28	; n'nn
 			dc.b $90, 9, $80, $0,	$48	; "nn
 		dc.b $A0, 9, $80, $40, $30	; rings
-		dc.b $40, 5, $81, $1A, 0	; icon
-		dc.b $40, $D, $81, $1E, $10	; SONIC x nn
+		dc.b $40, 5, $80, $46, 0	; icon
+		dc.b $40, $D, $80, $4A, $10	; SONIC x nn
 		even
+		
