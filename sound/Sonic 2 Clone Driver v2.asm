@@ -2237,10 +2237,8 @@ PSGSetFreq:
 	add.b	SMPS_Track.Transpose(a5),d5	; Add in channel transposition
 	andi.w	#$7F,d5			; Clear high byte and sign bit
 	add.w	d5,d5
-	movea.l	a6,-(sp)
-	lea	(PSGFrequencies).l,a6
-	move.w	(a6,d5.w),SMPS_Track.Freq(a5)	; Set new frequency
-	movea.l	(sp)+,a6
+	lea	(PSGFrequencies).l,a0
+	move.w	(a0,d5.w),SMPS_Track.Freq(a5)	; Set new frequency
 	; Clownacy | Sonic 2's driver doesn't continue to FinishTrackUpdate
 	rts
 ; ===========================================================================
