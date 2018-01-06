@@ -66,7 +66,7 @@ Sonic_UpdateSpindash:
 		bset	#2,obStatus(a0)
 		move.b	#0,(v_objspace+$1C0+obAnim).w
 		sfx	sfx_Teleport,0,0,0				; spindash zoom sound
-		move.b	angle(a0),d0
+		move.b	obAngle(a0),d0
 		jsr	(CalcSine).l
 		muls.w	obInertia(a0),d1
 		asr.l	#8,d1

@@ -14,7 +14,6 @@ HUD_Update_SS:
 		bsr.w	Hud_Base_SS
 		move.b	#1,(f_scorecount).w
 		move.b	#1,(f_ringcount).w
-		clr.b	(f_debughud).w
 	.proceed:
 		tst.b	(f_scorecount).w ; does the score need updating?
 		beq.s	.chkrings	; if not, branch
@@ -59,7 +58,7 @@ HUD_Update_SS:
 	.skip2:
 		add.b	d1,-(a1)
 		cmpi.b	#100,(a1)
-		bcs.s	.docent
+		bcs.s	.debugupdate
 		move.b	#0,(a1)		; clear jiffy
 		addq.b	#1,-(a1)	; inc sec
 		cmpi.b	#60,(a1)	; if 60
@@ -69,6 +68,11 @@ HUD_Update_SS:
 		cmpi.b	#9,(a1)		; if 9
 		bcs.s	.dotime
 		move.b	#9,(a1)		; set min to 9
+		
+	.debugupdate:
+		tst.b	(f_debughud).w
+		beq.s	.docent
+		clr.b	(f_debughud).w
 
 	.dotime:
 		hudVRAM	$4420

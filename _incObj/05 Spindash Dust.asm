@@ -22,20 +22,29 @@ Dust_Init:
 		move.w	#$F400,$3C(a0)
 ; ===========================================================================
 Dust_Main:
+		tst.w	(v_debuguse).w	; is debug mode being used?
+		bne.w	.return		; if yes, branch
 		cmpi.b	#2,(v_player+obRoutine).w		; is Sonic in routine 2 (normal control routine)?
-		bne.s	.return		; if not, branch
+		bne.w	.return		; if not, branch
 		moveq	#0,d0
 		btst	#staSpindash,(v_player+obStatus2).w		; is Sonic spindashing?
-		bne.s	.active		; if yes, branch
+		bne.s	.spindash		; if yes, branch
 		btst	#staPeelout,(v_player+obStatus2).w	; is Sonic peeling out?
 		beq.s	.return		; if not, branch
 		cmpi.b	#$1E,(v_player+obRevSpeed).w	; is Sonic charged up?
 		bne.s	.return		; if not, branch
-		move.w	#8,d0
-		btst	#0,(v_player+obStatus).w
-		beq.s	.active
-		neg.w	d0
-	
+		move.w	#8,d0	; set X offset to 0
+		btst	#0,(v_player+obStatus).w	; is Sonic facing left?
+		beq.s	.active	; if not, branch
+		neg.w	d0		; flip X offset
+		bra.s	.active
+
+	.spindash:
+		move.b	#2,obAnim(a0)	; use faster animation
+		cmpi.b	#8,(v_player+obRevSpeed).w		; is Sonic fully charged?
+		beq.s	.active		; if yes, branch
+		move.b	#1,obAnim(a0)	; use slower animation
+
 	.active:
 		lea	(v_player).l,a2
 		move.w	obX(a2),obX(a0)		; match Sonic's position

@@ -17,7 +17,6 @@ HUD_Update:
 		bsr.w	Hud_Base
 		move.b	#1,(f_scorecount).w
 		move.b	#1,(f_ringcount).w
-		clr.b	(f_debughud).w
 	.proceed:
 		tst.b	(f_scorecount).w ; does the score need updating?
 		beq.s	.chkrings	; if not, branch
@@ -63,7 +62,7 @@ HUD_Update:
 	.skip2:
 		add.b	d1,-(a1)
 		cmpi.b	#100,(a1)
-		bcs.s	.updatecent
+		bcs.s	.debugupdate
 		move.b	#0,(a1)
 		addq.b	#1,-(a1)	; increment second counter
 		cmpi.b	#60,(a1)	; check if passed 60
@@ -73,6 +72,11 @@ HUD_Update:
 		cmpi.b	#9,(a1)		; check if passed 9
 		bcs.s	.updatetime
 		move.b	#9,(a1)		; keep as 9
+
+	.debugupdate:
+		tst.b	(f_debughud).w
+		beq.s	.updatecent
+		clr.b	(f_debughud).w
 
 	.updatetime:
 		hudVRAM	$DE40

@@ -47,8 +47,12 @@ loc_131A6:
 		move.w	d0,obInertia(a0)
 
 loc_131AA:
-		tst.w	obInertia(a0)	; is Sonic moving?
-		bne.s	loc_131CC	; if yes, branch
+		move.w	obInertia(a0),d0
+		bpl.s	.chkinertia
+		neg.w	d0
+	.chkinertia:
+		cmpi.w	#$80,d0	; is Sonic moving at $80 speed or faster?
+		bhs.s	loc_131CC	; if yes, branch
 		bclr	#2,obStatus(a0)
 		move.b	#$13,obHeight(a0)
 		move.b	#9,obWidth(a0)
@@ -95,7 +99,7 @@ loc_1320A:
 loc_13218:
 		sub.w	d4,d0
 		bcc.s	loc_13220
-		move.w	#-$80,d0
+		moveq	#0,d0
 
 loc_13220:
 		move.w	d0,obInertia(a0)
@@ -117,7 +121,7 @@ Sonic_RollRight:
 loc_1323A:
 		add.w	d4,d0
 		bcc.s	loc_13242
-		move.w	#$80,d0
+		moveq	#0,d0
 
 loc_13242:
 		move.w	d0,obInertia(a0)
