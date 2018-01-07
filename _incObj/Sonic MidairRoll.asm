@@ -7,8 +7,7 @@
 Sonic_MidairRoll:
 		btst	#2,obStatus(a0)	; is Sonic already rolling?
 		bne.s	.return		; if yes, branch
-		move.b	(v_jpadpress2).w,d0
-		andi.b	#btnABC+btnDn,d0	; is A, B, C or Down pressed?
+		btst	#bitDn,(v_jpadpress2).w	; is down pressed?
 		beq.s	.return		; if not, branch
 		sfx	sfx_Roll,0,0,0	; play rolling sound
 		move.b	#$E,obHeight(a0)
@@ -27,7 +26,7 @@ Sonic_MidairRoll:
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
 Sonic_MidairUnroll:
-		btst	#2,obStatus(a0)	; is rolling?
+		btst	#2,obStatus(a0)	; is Sonic rolling?
 		beq.s	.return		; if not, branch
 		btst	#bitUp,(v_jpadpress2).w	; is up pressed?
 		beq.s	.return		; if not, branch
@@ -36,6 +35,7 @@ Sonic_MidairUnroll:
 		move.b	#id_Run,obAnim(a0)	; use running animation
 		bclr	#2,obStatus(a0)
 		subq.w	#5,obY(a0)
+		bclr	#staDropDash,obStatus2(a0)	; clear drop dash bit
 
 	.return:
 		rts

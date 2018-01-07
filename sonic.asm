@@ -6989,6 +6989,7 @@ Sonic_Modes:	dc.w Sonic_MdNormal-Sonic_Modes
 ; ---------------------------------------------------------------------------
 
 Sonic_MdNormal:
+		bclr	#staAirDash,obStatus2(a0)
 		bsr.w	Sonic_CheckSpindash
 		bsr.w	Sonic_Peelout
 		bsr.w	Sonic_Jump
@@ -7022,6 +7023,7 @@ loc_12E5C:
 ; ===========================================================================
 
 Sonic_MdRoll:
+		bclr	#staAirDash,obStatus2(a0)
 		bsr.w	Sonic_Jump
 		bsr.w	Sonic_RollRepel
 		bsr.w	Sonic_RollSpeed
@@ -7035,6 +7037,8 @@ Sonic_MdRoll:
 Sonic_MdJump2:
 		bclr	#staSpindash,obStatus2(a0)
 		bclr	#staPeelout,obStatus2(a0)
+		bsr.w	Sonic_AirDash
+		bsr.w	Sonic_DropDash
 		bsr.w	Sonic_MidairUnroll
 		bsr.w	Sonic_JumpHeight
 		bsr.w	Sonic_JumpDirection
@@ -7077,8 +7081,10 @@ locret_13302:
 		include	"_incObj/Sonic Jump.asm"
 		include "_incObj/Sonic AirAnim.asm"
 		include "_incObj/Sonic MidairRoll.asm"
+		include "_incObj/Sonic AirDash.asm"
 		include	"_incObj/Sonic JumpHeight.asm"
 		include "_incObj/Sonic Spindash.asm"
+		include "_incObj/Sonic DropDash.asm"
 		include "_incObj/Sonic Peelout.asm"
 		include	"_incObj/Sonic SlopeResist.asm"
 		include	"_incObj/Sonic RollRepel.asm"

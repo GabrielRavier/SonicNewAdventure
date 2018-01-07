@@ -118,6 +118,8 @@ obSolid:	equ ob2ndRout ; solid status flag
 obStatus2:	equ $39	; move status
 staSpindash:	equ 0
 staPeelout:	equ 1
+staAirDash:	equ 2
+staDropDash:	equ 3
 obRevSpeed:	equ $3A ; rev speed for Spindash/Peelout
 
 ; Object variables (Sonic 2 disassembly nomenclature)

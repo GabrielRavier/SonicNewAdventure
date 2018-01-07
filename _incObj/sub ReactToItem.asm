@@ -317,6 +317,7 @@ HurtSonic:
 	.isleft:
 		bclr	#staSpindash,obStatus2(a0)
 		bclr	#staPeelout,obStatus2(a0)
+		bclr	#staDropDash,obStatus2(a0)
 		move.w	#0,obInertia(a0)
 		move.b	#id_Hurt,obAnim(a0)
 		move.w	#120,$30(a0)	; set temp invincible time to 2 seconds

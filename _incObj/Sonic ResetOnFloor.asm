@@ -18,6 +18,11 @@ loc_137AE:
 		bclr	#4,obStatus(a0)
 		btst	#2,obStatus(a0)
 		beq.s	loc_137E4
+		btst	#staDropDash,obStatus2(a0)
+		beq.s	.nodropdash
+		bsr.w	Sonic_DropDashRelease
+		bra.s	loc_137E4
+	.nodropdash:
 		bclr	#2,obStatus(a0)
 		move.b	#$13,obHeight(a0)
 		move.b	#9,obWidth(a0)
