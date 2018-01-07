@@ -7007,7 +7007,6 @@ Sonic_MdJump:
 		bclr	#staSpindash,obStatus2(a0)
 		bclr	#staPeelout,obStatus2(a0)
 		bsr.w	Sonic_MidairRoll
-		bsr.w	Sonic_AirAnim
 		bsr.w	Sonic_JumpHeight
 		bsr.w	Sonic_JumpDirection
 		bsr.w	Sonic_LevelBound
@@ -7019,6 +7018,7 @@ Sonic_MdJump:
 loc_12E5C:
 		bsr.w	Sonic_JumpAngle
 		bsr.w	Sonic_Floor
+		bsr.w	Sonic_SetAnimAir
 		rts	
 ; ===========================================================================
 
@@ -7079,7 +7079,7 @@ locret_13302:
 		include	"_incObj/Sonic LevelBound.asm"
 		include	"_incObj/Sonic Roll.asm"
 		include	"_incObj/Sonic Jump.asm"
-		include "_incObj/Sonic AirAnim.asm"
+		include "_incObj/Sonic SetAnimAir.asm"
 		include "_incObj/Sonic MidairRoll.asm"
 		include "_incObj/Sonic AirDash.asm"
 		include	"_incObj/Sonic JumpHeight.asm"

@@ -34,15 +34,8 @@ Sonic_DropDashRelease:
 		beq.w	.return		; if not, branch
 		bclr	#staDropDash,obStatus2(a0)	; stop the Drop Dash
 		cmpi.b	#$E,obRevSpeed(a0)	; are we charged up enough?
-		bge.s	.start		; if yes, branch
-		bclr	#2,obStatus(a0)
-		move.b	#$13,obHeight(a0)
-		move.b	#9,obWidth(a0)
-		move.b	#id_Walk,obAnim(a0) ; use running/walking animation
-		subq.w	#5,obY(a0)
-		rts
+		blt.s	.return		; if not, branch
 		
-	.start:
 		; unleash the charged drop dash and start rolling quickly:
 		btst	#2,obStatus(a0)
 		bne.s	.alreadyrolling

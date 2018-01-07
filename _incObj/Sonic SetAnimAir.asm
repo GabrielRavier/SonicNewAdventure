@@ -1,10 +1,15 @@
 ; ---------------------------------------------------------------------------
-; Subroutine to	animate Sonic in the air
+; Subroutine to	set Sonic's animation in the air
 ; ---------------------------------------------------------------------------
 
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
-Sonic_AirAnim:
+Sonic_SetAnimAir:
+		btst	#1,obStatus(a0)	; is Sonic in the air?
+		bne.s	.inair		; if not, branch
+		move.b	#id_Run,obAnim(a0)	; use running animation
+		rts
+	.inair:
 		btst	#2,obStatus(a0)	; is Sonic rolling?
 		bne.s	.return		; if yes, branch
 		move.w	obVelX(a0),d0
@@ -14,7 +19,7 @@ Sonic_AirAnim:
 	.gotvelx:
 		cmpi.w	#$A00,d0	; is Sonic moving fast?
 		blt.s	.xslow		; if not, branch
-		move.b	#id_Walk,obAnim(a0)	; use walking animation
+		move.b	#id_Run,obAnim(a0)	; use running animation
 		rts
 	.xslow:
 		tst.w	obVelY(a0)	; is Sonic going up?
