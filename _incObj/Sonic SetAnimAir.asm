@@ -5,13 +5,10 @@
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
 Sonic_SetAnimAir:
-		cmpi.b	#6,obRoutine(a0)	; is Sonic in his standard routine?
+		cmpi.b	#2,obRoutine(a0)	; is Sonic in his standard routine?
 		bne.s	.return				; if not, branch
 		btst	#1,obStatus(a0)	; is Sonic in the air?
-		bne.s	.inair		; if not, branch
-		move.b	#id_Run,obAnim(a0)	; use running animation
-		rts
-	.inair:
+		beq.s	.runanim		; if not, branch
 		btst	#2,obStatus(a0)	; is Sonic rolling?
 		bne.s	.return		; if yes, branch
 		move.w	obVelX(a0),d0
@@ -20,19 +17,24 @@ Sonic_SetAnimAir:
 		neg.w	d0
 	.gotvelx:
 		cmpi.w	#$A00,d0	; is Sonic moving fast?
-		blt.s	.xslow		; if not, branch
-		move.b	#id_Run,obAnim(a0)	; use running animation
+		bge.s	.runanim	; if yes, branch
+		tst.w	obVelY(a0)	; is Sonic going down?
+		bgt.s	.goingdown	; if yes, branch
+		; so, we're going up then
+		move.b	#id_Spring,obAnim(a0)	; use spring animation
 		rts
-	.xslow:
-		tst.w	obVelY(a0)	; is Sonic going up?
-		ble.s	.goingup	; if yes, branch
-		; so, we're going down then
+	.goingdown:
 		move.b	#id_Fall2,obAnim(a0)	; use falling animation
-		cmpi.w	#$800,obVelY(a0)	; is Sonic falling fast?
-		bcc.s	.return		; if yes, branch
+		move.w	obVelY(a0),d0
+		tst.w	d0
+		bge.s	.gotvely
+		neg.w	d0
+	.gotvely:
+		cmpi.w	#$A00,d0	; is Sonic falling fast?
+		bge.s	.return		; if yes, branch
 		move.b	#id_Fall,obAnim(a0)		; use slower falling animation
 		rts
-	.goingup:
-		move.b	#id_Spring,obAnim(a0)	; use spring animation
+	.runanim:
+		move.b	#id_Run,obAnim(a0)	; use running animation
 	.return:
 		rts

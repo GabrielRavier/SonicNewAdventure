@@ -47,7 +47,7 @@ loc_17772:
 		move.w	obX(a0),$30(a0)
 		move.w	obY(a0),$38(a0)
 		move.b	#$F,obColType(a0)
-		move.b	#1,obColProp(a0) ; set number of hits to 8
+		move.b	#8,obColProp(a0) ; set number of hits to 8
 
 BGHZ_ShipMain:	; Routine 2
 		moveq	#0,d0

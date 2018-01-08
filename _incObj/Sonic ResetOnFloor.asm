@@ -18,14 +18,6 @@ loc_137AE:
 		bclr	#4,obStatus(a0)
 		btst	#2,obStatus(a0)
 		beq.s	loc_137E4
-		cmpa.l	a0,a1			; if a0 and a1 are the same, we're being called from SolidObject...
-		beq.s	.fromsolidobj	; ...so we're going to skip the call to Sonic_DropDashRelease
-		btst	#staDropDash,obStatus2(a0)
-		beq.s	.fromsolidobj
-		bsr.w	Sonic_DropDashRelease
-		bra.s	loc_137E4
-	.fromsolidobj:
-		bclr	#staDropDash,obStatus2(a0)
 		bclr	#2,obStatus(a0)
 		move.b	#$13,obHeight(a0)
 		move.b	#9,obWidth(a0)

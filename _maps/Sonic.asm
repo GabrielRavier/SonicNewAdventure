@@ -599,14 +599,14 @@ MS_Fall2:	dc.b 7
 		dc.b $F4, 4, 0, $E, 5	
 		dc.b $F4, 1, 0, $10, $F5	
 MS_Win1:	dc.b 2	
-		dc.b $EC, $B, 0, 0, $ED	
-		dc.b $C, 8, 0, $C, $ED	
+		dc.b $EC, $B, 0, 0, $EF	
+		dc.b $C, 8, 0, $C, $EF	
 MS_Win2:	dc.b 5	
-		dc.b $EC, 0, 0, 0, $ED	
-		dc.b $EC, 0, 0, 1, $F5	
-		dc.b $EC, 3, 0, 2, $FD	
-		dc.b $C, 8, 0, 6, $ED	
-		dc.b $F4, 6, 0, 9, $ED	
+		dc.b $EC, 0, 0, 0, $EF	
+		dc.b $EC, 0, 0, 1, $F7	
+		dc.b $EC, 3, 0, 2, $FF	
+		dc.b $C, 8, 0, 6, $EF	
+		dc.b $F4, 6, 0, 9, $EF	
 		even
 
 fr_Null:	equ (ptr_MS_Null-Map_Sonic_internal)/2		; 0

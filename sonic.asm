@@ -3034,7 +3034,9 @@ Level_MainLoop:
 		tst.w	(v_debuguse).w	; is debug mode being used?
 		bne.s	Level_DoScroll	; if yes, branch
 		cmpi.b	#6,(v_player+obRoutine).w ; has Sonic just died?
-		bhs.s	Level_SkipScroll ; if yes, branch
+		beq.s	Level_SkipScroll ; if yes, branch
+		cmpi.b	#8,(v_player+obRoutine).w ; has Sonic just died?
+		beq.s	Level_SkipScroll ; if not, branch
 
 	Level_DoScroll:
 		bsr.w	DeformLayers
@@ -7041,7 +7043,6 @@ Sonic_MdJump2:
 		bclr	#staSpindash,obStatus2(a0)
 		bclr	#staPeelout,obStatus2(a0)
 		bsr.w	Sonic_AirDash
-		bsr.w	Sonic_DropDash
 		bsr.w	Sonic_MidairUnroll
 		bsr.w	Sonic_JumpHeight
 		bsr.w	Sonic_JumpDirection
@@ -7087,7 +7088,6 @@ locret_13302:
 		include "_incObj/Sonic AirDash.asm"
 		include	"_incObj/Sonic JumpHeight.asm"
 		include "_incObj/Sonic Spindash.asm"
-		include "_incObj/Sonic DropDash.asm"
 		include "_incObj/Sonic Peelout.asm"
 		include	"_incObj/Sonic SlopeResist.asm"
 		include	"_incObj/Sonic RollRepel.asm"

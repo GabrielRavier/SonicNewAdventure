@@ -99,6 +99,8 @@ Sign_SparkPos:	dc.b -$18,-$10		; x-position, y-position
 Sign_SonicWin:	; Routine 6
 		tst.w	(v_debuguse).w	; is debug mode	on?
 		bne.w	locret_ECEE	; if yes, branch
+		tst.b	(v_player).w
+		beq.s	.sonicgone
 		btst	#1,(v_player+obStatus).w
 		bne.w	locret_ECEE
 		move.b	#1,(f_lockctrl).w ; lock controls
@@ -107,6 +109,7 @@ Sign_SonicWin:	; Routine 6
 		clr.w	(v_player+obVelY).w
 		move.b	#id_Win,(v_player+obAnim).w	; play winning animation
 		move.b	#$C,(v_player+obRoutine).w	; set winning routine
+	.sonicgone:
 		addq.b	#2,obRoutine(a0)
 
 ; ---------------------------------------------------------------------------

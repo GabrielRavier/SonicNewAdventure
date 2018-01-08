@@ -98,6 +98,10 @@ Sonic_Animate:
 		lsr.b	#4,d0		; divide angle by $10
 		andi.b	#6,d0		; angle	must be	0, 2, 4	or 6
 		move.w	obInertia(a0),d2 ; get Sonic's speed
+		btst	#1,obStatus(a0)
+		beq.s	.gotspeed
+		move.w	obVelX(a0),d2
+	.gotspeed:
 		bpl.s	.nomodspeed
 		neg.w	d2		; modulus speed
 

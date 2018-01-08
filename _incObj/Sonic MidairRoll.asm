@@ -35,7 +35,6 @@ Sonic_MidairUnroll:
 		move.b	#id_Run,obAnim(a0)	; use running animation
 		bclr	#2,obStatus(a0)
 		subq.w	#5,obY(a0)
-		bclr	#staDropDash,obStatus2(a0)	; clear drop dash bit
 
 	.return:
 		rts

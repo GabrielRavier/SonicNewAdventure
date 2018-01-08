@@ -201,6 +201,8 @@ Pri_EndAct:	; Routine $E
 ; ===========================================================================
 		
 Pri_WaitLand:	; Routine $10
+		tst.b	(v_player).w
+		beq.s	.sonicgone
 		btst	#1,(v_player+obStatus).w
 		beq.s	.return
 		move.b	#1,(f_lockctrl).w ; lock controls
@@ -209,6 +211,7 @@ Pri_WaitLand:	; Routine $10
 		clr.w	(v_player+obVelY).w
 		move.b	#id_Win,(v_player+obAnim).w	; play winning animation
 		move.b	#$C,(v_player+obRoutine).w	; set winning routine
+	.sonicgone:
 		jsr	(GotThroughAct).l
 		jmp	(DeleteObject).l
 

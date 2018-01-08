@@ -50,12 +50,9 @@ Sonic_Death:	; Routine 6
 		clr.b	(v_cameralag).w
 		bsr.w	GameOver
 		jsr	(ObjectFall).l
-		btst	#4,obStatus(a0)
-		bne.s	.goingup
 		tst.w	obVelY(a0)
 		ble.s	.goingup
 		move.b	#id_Drown,obAnim(a0)
-		bset	#4,obStatus(a0)
 	.goingup:
 		bsr.w	Sonic_RecordPosition
 		bsr.w	Sonic_Animate
@@ -125,7 +122,6 @@ Sonic_ResetLevel:; Routine 8
 ; Sonic	after passing a signpost/breaking a capsule open
 ; ---------------------------------------------------------------------------
 Sonic_Won:	; Routine $C
-		clr.w	obVelX(a0)
 		bsr.w	Sonic_LevelBound
 		jsr	(ObjectFall).l
 		subi.w	#$28,obVelY(a0)
