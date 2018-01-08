@@ -2198,6 +2198,22 @@ GM_LevSel:
 		bsr.w	PaletteFadeOut
 		bsr.w	ClearScreen
 		disable_ints
+		lea	(vdp_control_port).l,a6
+		move.w	#$8004,(a6)	; 8-colour mode
+		move.w	#$8200+(vram_fg>>10),(a6) ; set foreground nametable address
+		move.w	#$8400+(vram_bg>>13),(a6) ; set background nametable address
+		move.w	#$9001,(a6)	; 64-cell hscroll size
+		move.w	#$9200,(a6)	; window vertical position
+		move.w	#$8B03,(a6)
+		move.w	#$8720,(a6)	; set background colour (palette line 2, entry 0)
+		clr.b	(f_wtr_state).w
+		bsr.w	ClearScreen
+		
+		move.b	#0,(v_lastlamp).w ; clear lamppost counter
+		move.w	#0,(v_debuguse).w ; disable debug item placement mode
+		move.w	#0,(f_demo).w	; disable debug mode
+		move.b	#0,(f_nobgscroll).w
+
 		locVRAM	$4000
 		lea	(Nem_LevSelBG).l,a0 ; load level select BG patterns
 		bsr.w	NemDec
@@ -2213,7 +2229,6 @@ GM_LevSel:
 		
 		moveq	#palid_LevelSel,d0
 		bsr.w	PalLoad1	; load level select palette
-		bsr.w	PalLoad3_Water	; load level select palette, fixes screen being black when quitting from LZ/SBZ3
 		
 		lea	(v_hscrolltablebuffer).w,a1
 		moveq	#0,d0
