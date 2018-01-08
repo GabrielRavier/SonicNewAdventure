@@ -30,7 +30,7 @@ Sonic_SetAnimAir:
 		bge.s	.gotvely
 		neg.w	d0
 	.gotvely:
-		cmpi.w	#$A00,d0	; is Sonic falling fast?
+		cmpi.w	#$800,d0	; is Sonic falling fast?
 		bge.s	.return		; if yes, branch
 		move.b	#id_Fall,obAnim(a0)		; use slower falling animation
 		rts
