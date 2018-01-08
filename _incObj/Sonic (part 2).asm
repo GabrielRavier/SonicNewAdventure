@@ -120,3 +120,18 @@ Sonic_ResetLevel:; Routine 8
 
 	locret_13914:
 		rts	
+
+; ---------------------------------------------------------------------------
+; Sonic	after passing a signpost/breaking a capsule open
+; ---------------------------------------------------------------------------
+Sonic_Won:	; Routine $C
+		clr.w	obVelX(a0)
+		bsr.w	Sonic_LevelBound
+		jsr	(ObjectFall).l
+		subi.w	#$28,obVelY(a0)
+		bsr.w	Sonic_Floor
+		move.b	#id_Win,obAnim(a0)	; play winning animation
+		bsr.w	Sonic_RecordPosition
+		bsr.w	Sonic_Animate
+		bsr.w	Sonic_LoadGfx
+		jmp	(DisplaySprite).l

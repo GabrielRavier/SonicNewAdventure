@@ -16,7 +16,7 @@ Signpost:
 Sign_Index:	dc.w Sign_Main-Sign_Index
 		dc.w Sign_Touch-Sign_Index
 		dc.w Sign_Spin-Sign_Index
-		dc.w Sign_SonicRun-Sign_Index
+		dc.w Sign_SonicWin-Sign_Index
 		dc.w Sign_Exit-Sign_Index
 
 spintime:	equ $30		; time for signpost to spin
@@ -96,26 +96,18 @@ Sign_SparkPos:	dc.b -$18,-$10		; x-position, y-position
 		dc.b  $18, $10
 ; ===========================================================================
 
-Sign_SonicRun:	; Routine 6
+Sign_SonicWin:	; Routine 6
 		tst.w	(v_debuguse).w	; is debug mode	on?
 		bne.w	locret_ECEE	; if yes, branch
 		btst	#1,(v_player+obStatus).w
-		bne.s	loc_EC70
+		bne.w	locret_ECEE
 		move.b	#1,(f_lockctrl).w ; lock controls
-		move.w	#btnR<<8,(v_jpadhold2).w ; make Sonic run to the right
-
-	loc_EC70:
-		tst.b	(v_player).w
-		beq.s	loc_EC86
-		move.w	(v_player+obX).w,d0
-		move.w	(v_limitright2).w,d1
-		addi.w	#$128,d1
-		cmp.w	d1,d0
-		bcs.s	locret_ECEE
-
-	loc_EC86:
+		clr.w	(v_jpadhold2).w
+		clr.w	(v_player+obVelX).w
+		clr.w	(v_player+obVelY).w
+		move.b	#id_Win,(v_player+obAnim).w	; play winning animation
+		move.b	#$C,(v_player+obRoutine).w	; set winning routine
 		addq.b	#2,obRoutine(a0)
-
 
 ; ---------------------------------------------------------------------------
 ; Subroutine to	set up bonuses at the end of an	act

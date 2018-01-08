@@ -6216,6 +6216,8 @@ loc_D358:
 loc_D362:
 		cmpi.b	#$A,(v_player+obRoutine).w		; has Sonic drowned?
 		beq.s	loc_D348						; if so, run objects a little longer
+		cmpi.b	#$C,(v_player+obRoutine).w
+		beq.s	loc_D348
 		moveq	#$1F,d7
 		bsr.s	loc_D348
 		moveq	#$5F,d7
@@ -6909,6 +6911,7 @@ Sonic_Index:	dc.w Sonic_Main-Sonic_Index
 		dc.w Sonic_Death-Sonic_Index
 		dc.w Sonic_ResetLevel-Sonic_Index
 		dc.w Sonic_Drowned-Sonic_Index
+		dc.w Sonic_Won-Sonic_Index
 ; ===========================================================================
 
 Sonic_Main:	; Routine 0

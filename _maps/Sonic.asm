@@ -123,6 +123,8 @@ ptr_MS_BalanceBack3:	dc.w MS_BalanceBack3-Map_Sonic_internal
 ptr_MS_BalanceBack4:	dc.w MS_BalanceBack4-Map_Sonic_internal
 ptr_MS_Fall1:	dc.w MS_Fall1-Map_Sonic_internal
 ptr_MS_Fall2:	dc.w MS_Fall2-Map_Sonic_internal
+ptr_MS_Win1:	dc.w MS_Win1-Map_Sonic_internal
+ptr_MS_Win2:	dc.w MS_Win2-Map_Sonic_internal
 
 MS_Null:	dc.b 0
 MS_Stand:	dc.b 4			; standing
@@ -588,11 +590,24 @@ MS_Fall1:	dc.b 4
 		dc.b $EC, $A, 0, 1, $F5	
 		dc.b $F4, 1, 0, $A, $D	
 		dc.b 4, 6, 0, $C, $F5	
-MS_Fall2:	dc.b 4	
+MS_Fall2:	dc.b 7	
 		dc.b $F4, 0, 0, 0, $ED	
-		dc.b $EC, $D, 0, 1, $F5	
-		dc.b $FC, 8, 0, 9, $F5	
-		dc.b 4, 6, 0, $C, $F5	
+		dc.b $F4, 1, 0, 1, $FD	
+		dc.b $FC, 0, 0, 3, 5	
+		dc.b 4, 6, 0, 4, $F5	
+		dc.b $EC, $C, 0, $A, $F5	
+		dc.b $F4, 4, 0, $E, 5	
+		dc.b $F4, 1, 0, $10, $F5	
+MS_Win1:	dc.b 2	
+		dc.b $EC, $B, 0, 0, $ED	
+		dc.b $C, 8, 0, $C, $ED	
+MS_Win2:	dc.b 5	
+		dc.b $EC, 0, 0, 0, $ED	
+		dc.b $EC, 0, 0, 1, $F5	
+		dc.b $EC, 3, 0, 2, $FD	
+		dc.b $C, 8, 0, 6, $ED	
+		dc.b $F4, 6, 0, 9, $ED	
+		even
 
 fr_Null:	equ (ptr_MS_Null-Map_Sonic_internal)/2		; 0
 fr_Stand:	equ (ptr_MS_Stand-Map_Sonic_internal)/2		; 1
@@ -714,3 +729,5 @@ fr_BalanceBack3:	equ (ptr_MS_BalanceBack3-Map_Sonic_internal)/2
 fr_BalanceBack4:	equ (ptr_MS_BalanceBack4-Map_Sonic_internal)/2
 fr_Fall1:	equ (ptr_MS_Fall1-Map_Sonic_internal)/2
 fr_Fall2:	equ (ptr_MS_Fall2-Map_Sonic_internal)/2
+fr_Win1:	equ (ptr_MS_Win1-Map_Sonic_internal)/2
+fr_Win2:	equ (ptr_MS_Win2-Map_Sonic_internal)/2

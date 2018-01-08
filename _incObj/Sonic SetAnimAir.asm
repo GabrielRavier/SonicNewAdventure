@@ -5,6 +5,8 @@
 ; ||||||||||||||| S U B	R O U T	I N E |||||||||||||||||||||||||||||||||||||||
 
 Sonic_SetAnimAir:
+		cmpi.b	#6,obRoutine(a0)	; is Sonic in his standard routine?
+		bne.s	.return				; if not, branch
 		btst	#1,obStatus(a0)	; is Sonic in the air?
 		bne.s	.inair		; if not, branch
 		move.b	#id_Run,obAnim(a0)	; use running animation
