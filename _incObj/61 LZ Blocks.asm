@@ -126,7 +126,6 @@ LBlk_Action:	; Routine 2
 		subq.w	#8,obVelY(a0)	; make block rise
 		
 	.attopspeed:
-		subq.w	#8,obVelY(a0)	; make block rise
 		bsr.w	ObjHitCeiling
 		tst.w	d1		; has block hit the ceiling?
 		bpl.w	.noceiling04	; if not, branch
