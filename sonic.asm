@@ -11,6 +11,15 @@
 
 zeroOffsetOptimization = 1
 ;	| If 1, makes a handful of zero-offset instructions smaller
+
+saveSpace = 1
+;	| If 1, removes many unused/leftover/dead code, improving performance
+
+fixBugs = 1
+;	| If 1, fixes a few bugs
+
+saveSpeed = 1
+;	| If 1, optimises the code to be a little quicker
 	
 	include "MacroSetup.asm"
 	include	"Constants.asm"
@@ -983,7 +992,11 @@ ClearScreen:
 
 		lea	(v_spritetablebuffer).w,a1
 		moveq	#0,d0
+		if fixBugs = 0
 		move.w	#($280/4),d1	; This should be ($280/4)-1, leading to a slight bug (first bit of v_pal_water is cleared)
+		else
+		move.w	#($280/4)-1,d1
+		endif
 
 	.clearsprites:
 		move.l	d0,(a1)+
@@ -991,7 +1004,11 @@ ClearScreen:
 
 		lea	(v_hscrolltablebuffer).w,a1
 		moveq	#0,d0
+		if fixBugs = 0
 		move.w	#($400/4),d1	; This should be ($400/4)-1, leading to a slight bug (first bit of the Sonic object's RAM is cleared)
+		else
+		move.w	#($400/4)-1,d1
+		endif
 
 	.clearhscroll:
 		move.l	d0,(a1)+
@@ -2034,7 +2051,9 @@ GM_Title:
 		move.b	#0,(v_lastlamp).w ; clear lamppost counter
 		move.w	#0,(v_debuguse).w ; disable debug item placement mode
 		move.w	#0,(f_demo).w	; disable debug mode
+		if saveSpace = 0
 		move.w	#0,($FFFFFFEA).w ; unused variable
+		endif
 		move.b	#0,(f_nobgscroll).w
 		move.w	#(id_GHZ<<8),(v_zone).w	; set level to GHZ (00)
 		move.w	#0,(v_pcyc_time).w ; disable palette cycling
@@ -3050,8 +3069,8 @@ Level_MainLoop:
 		bne.s	Level_DoScroll	; if yes, branch
 		cmpi.b	#6,(v_player+obRoutine).w ; has Sonic just died?
 		beq.s	Level_SkipScroll ; if yes, branch
-		cmpi.b	#8,(v_player+obRoutine).w ; has Sonic just died?
-		beq.s	Level_SkipScroll ; if not, branch
+ 		cmpi.b	#8,(v_player+obRoutine).w ; has Sonic just died?
+ 		beq.s	Level_SkipScroll ; if not, branch
 
 	Level_DoScroll:
 		bsr.w	DeformLayers
@@ -3313,8 +3332,13 @@ GM_Special:
 		moveq	#palid_Special,d0
 		bsr.w	PalLoad1	; load special stage palette
 		jsr	(SS_Load).l		; load SS layout data
+		if saveSpeed = 0
 		move.l	#0,(v_screenposx).w
 		move.l	#0,(v_screenposy).w
+		else
+		clr.l	(v_screenposx).w
+		clr.l	(v_screenposy).w
+		endif
 		move.b	#id_SonicSpecial,(v_player).w ; load special stage Sonic object
 		move.b	#$FF,(v_ssangleprev).w	; fill previous angle with obviously false value to force an update
 		move.b	#1,(f_timecount).w ; update time counter
@@ -5090,6 +5114,7 @@ Calc_VRAM_Pos:
 
 
 sub_6C3C:
+		if saveSpace = 0
 		add.w	4(a3),d4
 		add.w	(a3),d5
 		andi.w	#$F0,d4
@@ -5101,6 +5126,7 @@ sub_6C3C:
 		swap	d0
 		move.w	d4,d0
 		rts	
+		endif
 ; End of function sub_6C3C
 
 ; ---------------------------------------------------------------------------
@@ -5573,7 +5599,9 @@ Map_Swing_SLZ:	include	"_maps/Swinging Platforms (SLZ).asm"
 		include	"_incObj/17 Spiked Pole Helix.asm"
 Map_Hel:	include	"_maps/Spiked Pole Helix.asm"
 Map_Plat_Unused:include	"_incObj/18 Platforms.asm"
+		if saveSpace = 0
 		include	"_maps/Platforms (unused).asm"
+		endif
 Map_Plat_GHZ:	include	"_maps/Platforms (GHZ).asm"
 Map_Plat_SYZ:	include	"_maps/Platforms (SYZ).asm"
 Map_Plat_SLZ:	include	"_maps/Platforms (SLZ).asm"
@@ -5692,7 +5720,9 @@ Map_CFlo:	include	"_maps/Collapsing Floors.asm"
 Map_Scen:	include	"_maps/Scenery.asm"
 
 		include	"_incObj/1D Unused Switch.asm"
-Map_Swi:	include	"_maps/Unused Switch.asm"
+Map_Swi:	if saveSpace = 0
+		include	"_maps/Unused Switch.asm"
+		endif
 
 		include	"_incObj/2A SBZ Small Door.asm"
 		include	"_anim/SBZ Small Door.asm"
@@ -7080,6 +7110,7 @@ loc_12EA6:
 ; ---------------------------------------------------------------------------
 ; Unused subroutine to squash Sonic
 ; ---------------------------------------------------------------------------
+		if saveSpace = 0
 		move.b	obAngle(a0),d0
 		addi.b	#$20,d0
 		andi.b	#$C0,d0
@@ -7093,7 +7124,8 @@ loc_12EA6:
 		move.b	#id_Warp3,obAnim(a0) ; use "warping" animation
 
 locret_13302:
-		rts	
+		rts
+		endif
 
 		include	"_incObj/Sonic LevelBound.asm"
 		include	"_incObj/Sonic Roll.asm"
@@ -7167,8 +7199,10 @@ Map_Drown:	include	"_maps/Drowning Countdown.asm"
 		include	"_incObj/08 Water Splash.asm"
 		include	"_anim/Shield and Invincibility.asm"
 Map_Shield:	include	"_maps/Shield and Invincibility.asm"
+		if saveSpace = 0
 		include	"_anim/Special Stage Entry (Unused).asm"
 Map_Vanish:	include	"_maps/Special Stage Entry (Unused).asm"
+		endif
 		include	"_anim/Water Splash.asm"
 Map_Splash:	include	"_maps/Water Splash.asm"
 
@@ -7681,6 +7715,9 @@ ObjHitWallLeft:
 		; The cause is this: a missing instruction to flip collision on the found
 		; 16x16 block; this one:
 		;eori.w	#$F,d3
+		if fixBugs = 1
+		eori.w #$F,d3
+		endif
 		lea	(v_anglebuffer).w,a4
 		move.b	#0,(a4)
 		movea.w	#-$10,a3
