@@ -152,8 +152,11 @@ Bas_Action:	; Routine 2
 		rts	
 ; ===========================================================================
 ; unused crap
+		if saveSpace = 0
 		bsr.w	SpeedToPos
 		bsr.w	DisplaySprite
 		tst.b	obRender(a0)
 		bpl.w	DeleteObject
-		rts	
+		rts
+		endif
+		
