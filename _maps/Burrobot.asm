@@ -24,9 +24,12 @@ Map_Burro_internal:
 .fall:		dc.b 2
 		dc.b $E8, $A, 0, $F, $F0 ; falling after jumping up
 		dc.b 0,	$A, 0, $42, $F4
-.facedown:	dc.b 2
+.facedown:
+		if saveSpace = 0
+		dc.b 2
 		dc.b $F4, 6, 0,	$4B, $E8 ; facing down (unused)
 		dc.b $F4, $A, 0, $51, $F8
+		endif
 .walk3:		dc.b 2
 		dc.b $EC, $A, 0, $F, $F0
 		dc.b 4,	9, 0, 9, $F4
