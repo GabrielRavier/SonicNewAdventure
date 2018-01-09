@@ -11,7 +11,8 @@ Sonic_AirDash:
 		bne.s	.return		; if yes, branch
 		btst	#bitA,(v_jpadpress2).w	; is A pressed?
 		beq.s	.return	; if not, branch
-		move.w	#$A00,obVelX(a0)	; set X speed
+		move.w	(v_sonspeedmax).w,obVelX(a0)	; set X speed to max speed
+		lsl.w	#1,obVelX(a0)	; double it
 		btst	#0,obStatus(a0)	; is Sonic facing left?
 		beq.s	.launch		; if not, branch
 		neg.w	obVelX(a0)	; flip X speed
