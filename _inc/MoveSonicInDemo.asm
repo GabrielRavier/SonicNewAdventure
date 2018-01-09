@@ -14,6 +14,7 @@ MoveSonicInDemo:
 ; This is an unused subroutine for recording a demo
 
 DemoRecorder:
+		if saveSpace = 0
 		lea	($80000).l,a1
 		move.w	(v_btnpushtime1).w,d0
 		adda.w	d0,a1
@@ -31,6 +32,7 @@ DemoRecorder:
 		addq.w	#2,(v_btnpushtime1).w
 		andi.w	#$3FF,(v_btnpushtime1).w
 		rts	
+		endif
 ; ===========================================================================
 
 MDemo_On:
